@@ -19,7 +19,7 @@ export default async function AdminDashboard() {
   try {
     [pendingCourses, allUsers] = await Promise.all([
       db.course.findMany({
-        where: { isPublished: true, isApproved: false },
+        where: { isPublished: true },
         include: {
           teacher: { select: { id: true, name: true, email: true, image: true } },
           modules: { include: { lessons: { select: { id: true } } } },
@@ -49,7 +49,7 @@ export default async function AdminDashboard() {
       <div className="grid grid-cols-3 gap-4 mb-8">
         <div className="border border-border/50 rounded-lg p-4">
           <div className="text-2xl font-bold text-primary">{pendingCourses.length}</div>
-          <div className="text-sm text-muted-foreground">Pending Approval</div>
+          <div className="text-sm text-muted-foreground">Published Courses</div>
         </div>
         <div className="border border-border/50 rounded-lg p-4">
           <div className="text-2xl font-bold">{allUsers.length}</div>
@@ -64,12 +64,10 @@ export default async function AdminDashboard() {
       <Tabs defaultValue="courses">
         <TabsList className="mb-6">
           <TabsTrigger value="courses">
-            Pending Courses
-            {pendingCourses.length > 0 && (
-              <Badge variant="destructive" className="ml-2 h-5 px-1.5 text-xs">
-                {pendingCourses.length}
-              </Badge>
-            )}
+            Published Courses
+            <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
+              {pendingCourses.length}
+            </Badge>
           </TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
         </TabsList>
@@ -78,7 +76,7 @@ export default async function AdminDashboard() {
           {pendingCourses.length === 0 ? (
             <div className="text-center py-16 text-muted-foreground border border-dashed border-border/50 rounded-xl">
               <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-30" />
-              <p>No courses pending approval</p>
+              <p>No published courses yet</p>
             </div>
           ) : (
             <div className="space-y-4">

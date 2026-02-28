@@ -41,8 +41,8 @@ export default async function EditCoursePage({
   }
 
   return (
-    <div className="min-h-screen">
-      <div className="border-b border-border/50 px-6 py-3 flex items-center gap-3">
+    <div className="h-full flex flex-col">
+      <div className="border-b border-border/50 px-6 py-3 flex items-center gap-3 flex-shrink-0">
         <Button variant="ghost" size="sm" asChild>
           <Link href="/teacher">
             <ArrowLeft className="h-4 w-4 mr-1" />
@@ -50,7 +50,9 @@ export default async function EditCoursePage({
           </Link>
         </Button>
       </div>
-      <TeacherCourseEditor course={course} />
+      <div className="flex-1 min-h-0 overflow-y-auto">
+        <TeacherCourseEditor course={course} />
+      </div>
     </div>
   )
 }

@@ -10,6 +10,7 @@ const updateCourseSchema = z.object({
   price: z.number().min(0).optional(),
   thumbnail: z.string().optional(),
   isPublished: z.boolean().optional(),
+  isApproved: z.boolean().optional(),
 })
 
 export async function GET(
@@ -47,8 +48,8 @@ export async function GET(
       return NextResponse.json({ course })
     }
 
-    // Public access: course must be published and approved
-    if (!course.isPublished || !course.isApproved) {
+    // Public access: course must be published
+    if (!course.isPublished) {
       return NextResponse.json({ error: "Course not found" }, { status: 404 })
     }
 
@@ -116,6 +117,8 @@ export async function PUT(
           { status: 400 }
         )
       }
+      // Auto-approve when teacher publishes – no separate review step needed
+      data.isApproved = true
     }
 
     const updated = await db.course.update({

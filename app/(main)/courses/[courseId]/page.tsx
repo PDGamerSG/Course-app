@@ -23,7 +23,7 @@ export default async function CourseDetailPage({
   let course
   try {
     course = await db.course.findUnique({
-      where: { id: params.courseId, isPublished: true, isApproved: true },
+      where: { id: params.courseId, isPublished: true },
       include: {
         teacher: { select: { id: true, name: true, image: true, email: true } },
         modules: {
@@ -193,6 +193,9 @@ export default async function CourseDetailPage({
                   isOwner={isOwner}
                   firstLessonId={firstLesson?.id}
                   isLoggedIn={!!session?.user}
+                  courseName={course.title}
+                  userName={session?.user?.name ?? undefined}
+                  userEmail={session?.user?.email ?? undefined}
                 />
 
                 <ul className="space-y-2 text-sm text-muted-foreground">

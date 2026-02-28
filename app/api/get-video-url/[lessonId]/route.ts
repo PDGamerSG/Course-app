@@ -58,10 +58,19 @@ export async function GET(
       return NextResponse.json({ error: "Lesson not found" }, { status: 404 })
     }
 
+    // Encode the video ID so it isn't immediately identifiable in network responses
+    const encode = (id: string) => Buffer.from(id).toString("base64")
+
     // Allow access if lesson is free
     if (lesson.isFree) {
-      const embedUrl = `https://www.youtube-nocookie.com/embed/${lesson.youtubeVideoId}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1`
-      return NextResponse.json({ embedUrl })
+      return NextResponse.json({ vid: encode(lesson.youtubeVideoId) })
+    }
+
+    // Allow access if user is the course teacher or an admin
+    const isOwner = lesson.module.course.teacherId === userId
+    const isAdmin = session.user.role === "ADMIN"
+    if (isOwner || isAdmin) {
+      return NextResponse.json({ vid: encode(lesson.youtubeVideoId) })
     }
 
     // Otherwise check enrollment
@@ -78,8 +87,7 @@ export async function GET(
       return NextResponse.json({ error: "You are not enrolled in this course" }, { status: 401 })
     }
 
-    const embedUrl = `https://www.youtube-nocookie.com/embed/${lesson.youtubeVideoId}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1`
-    return NextResponse.json({ embedUrl })
+    return NextResponse.json({ vid: encode(lesson.youtubeVideoId) })
   } catch (error) {
     console.error("[GET /api/get-video-url/[lessonId]]", error)
     return NextResponse.json({ error: "Internal server error" }, { status: 500 })

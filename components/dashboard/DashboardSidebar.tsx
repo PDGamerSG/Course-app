@@ -31,7 +31,6 @@ function getNavItems(role: Role): NavItem[] {
     return [
       { href: "/teacher", label: "My Courses", icon: BookOpen },
       { href: "/teacher/courses/new", label: "Create Course", icon: Plus },
-      { href: "/student", label: "Learning", icon: GraduationCap },
     ]
   }
   return [

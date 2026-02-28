@@ -1,13 +1,12 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Users, BookOpen, Star } from "lucide-react"
+import { Users, BookOpen, Clock, PlayCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
-import { Card, CardContent } from "@/components/ui/card"
 
 interface CourseCardProps {
   id: string
   title: string
-  description: string
+  description: string | null
   thumbnail: string | null
   price: number
   teacher: {
@@ -29,8 +28,9 @@ export default function CourseCard({
   enrollmentCount = 0,
 }: CourseCardProps) {
   return (
-    <Link href={`/courses/${id}`}>
-      <Card className="group overflow-hidden border-border/50 hover:border-primary/50 hover:shadow-lg hover:shadow-primary/10 transition-all duration-300 h-full">
+    <Link href={`/courses/${id}`} className="group block">
+      <div className="rounded-xl overflow-hidden border border-border/60 bg-card hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 h-full flex flex-col">
+
         {/* Thumbnail */}
         <div className="relative aspect-video bg-muted overflow-hidden">
           {thumbnail ? (
@@ -38,59 +38,84 @@ export default function CourseCard({
               src={thumbnail}
               alt={title}
               fill
-              className="object-cover group-hover:scale-105 transition-transform duration-300"
+              className="object-cover group-hover:scale-[1.04] transition-transform duration-500"
             />
           ) : (
-            <div className="absolute inset-0 flex items-center justify-center bg-gradient-to-br from-primary/20 to-primary/5">
-              <BookOpen className="h-12 w-12 text-primary/40" />
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-primary/20 via-primary/10 to-muted gap-2">
+              <BookOpen className="h-10 w-10 text-primary/50" />
+              <span className="text-xs text-muted-foreground font-medium">LearnHub</span>
             </div>
           )}
-          {price === 0 && (
-            <Badge className="absolute top-2 left-2 bg-green-500 hover:bg-green-500 text-white">
-              Free
-            </Badge>
-          )}
+
+          {/* Play overlay on hover */}
+          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <div className="bg-white/90 rounded-full p-3 shadow-lg">
+              <PlayCircle className="h-6 w-6 text-primary fill-primary" />
+            </div>
+          </div>
+
+          {/* Badges */}
+          <div className="absolute top-2.5 left-2.5 flex gap-1.5">
+            {price === 0 ? (
+              <Badge className="bg-green-500 hover:bg-green-500 text-white text-[11px] font-semibold shadow">
+                Free
+              </Badge>
+            ) : (
+              <Badge className="bg-black/70 hover:bg-black/70 text-white text-[11px] font-semibold backdrop-blur-sm shadow">
+                &#8377;{price.toLocaleString("en-IN")}
+              </Badge>
+            )}
+          </div>
         </div>
 
-        <CardContent className="p-4 space-y-3">
-          <div>
-            <h3 className="font-semibold text-sm leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+        {/* Body */}
+        <div className="p-4 flex flex-col flex-1 gap-3">
+          <div className="flex-1">
+            <h3 className="font-bold text-sm leading-snug line-clamp-2 group-hover:text-primary transition-colors mb-1.5">
               {title}
             </h3>
-            <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{description}</p>
+            {description && (
+              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{description}</p>
+            )}
           </div>
 
-          <p className="text-xs text-muted-foreground">
-            by <span className="text-foreground font-medium">{teacher.name || "Anonymous"}</span>
-          </p>
-
-          <div className="flex items-center gap-3 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <BookOpen className="h-3 w-3" />
-              <span>{lessonCount} lessons</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <Users className="h-3 w-3" />
-              <span>{enrollmentCount} students</span>
-            </div>
-            <div className="flex items-center gap-1 ml-auto">
-              <Star className="h-3 w-3 fill-yellow-400 text-yellow-400" />
-              <span className="text-foreground font-medium">4.8</span>
-            </div>
-          </div>
-
-          <div className="flex items-center justify-between pt-1 border-t border-border/50">
-            <span className="font-bold text-lg">
-              {price === 0 ? (
-                <span className="text-green-500">Free</span>
-              ) : (
-                <span>₹{price.toLocaleString("en-IN")}</span>
-              )}
+          {/* Teacher */}
+          <div className="flex items-center gap-2">
+            {teacher.image ? (
+              <Image
+                src={teacher.image}
+                alt={teacher.name ?? "Teacher"}
+                width={20}
+                height={20}
+                className="rounded-full object-cover"
+              />
+            ) : (
+              <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary">
+                {(teacher.name ?? "T")[0].toUpperCase()}
+              </div>
+            )}
+            <span className="text-xs text-muted-foreground">
+              <span className="text-foreground font-medium">{teacher.name || "Anonymous"}</span>
             </span>
-            <span className="text-xs text-muted-foreground">Lifetime access</span>
           </div>
-        </CardContent>
-      </Card>
+
+          {/* Footer stats */}
+          <div className="flex items-center gap-3 text-[11px] text-muted-foreground pt-2 border-t border-border/50">
+            <span className="flex items-center gap-1">
+              <PlayCircle className="h-3 w-3" />
+              {lessonCount} lessons
+            </span>
+            <span className="flex items-center gap-1">
+              <Users className="h-3 w-3" />
+              {enrollmentCount.toLocaleString()} students
+            </span>
+            <span className="flex items-center gap-1 ml-auto">
+              <Clock className="h-3 w-3" />
+              Lifetime access
+            </span>
+          </div>
+        </div>
+      </div>
     </Link>
   )
 }

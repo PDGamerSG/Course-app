@@ -49,7 +49,7 @@ export default function NewCoursePage() {
       }
       const res = await axios.post("/api/courses", payload)
       toast({ title: "Course created!", description: "Now add modules and lessons." })
-      router.push(`/teacher/courses/${res.data.id}/edit`)
+      router.push(`/teacher/courses/${res.data.course.id}/edit`)
     } catch {
       toast({ title: "Error", description: "Failed to create course.", variant: "destructive" })
     } finally {

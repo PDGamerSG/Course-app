@@ -2,11 +2,13 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { getRazorpay } from "@/lib/razorpay"
 
 const createOrderSchema = z.object({
   courseId: z.string().min(1, "Course ID is required"),
 })
+
+const isRazorpayConfigured = () =>
+  !!(process.env.RAZORPAY_KEY_ID && process.env.RAZORPAY_KEY_SECRET)
 
 export async function POST(request: NextRequest) {
   try {
@@ -37,7 +39,18 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "You are already enrolled in this course" }, { status: 400 })
     }
 
-    // Amount in paise (INR smallest unit)
+    // ── TEST / MOCK MODE (Razorpay keys not configured) ──
+    if (!isRazorpayConfigured()) {
+      return NextResponse.json({
+        mock: true,
+        courseId,
+        amount: course.price,
+        courseName: course.title,
+      })
+    }
+
+    // ── REAL RAZORPAY MODE ──
+    const { getRazorpay } = await import("@/lib/razorpay")
     const amountInPaise = Math.round(course.price * 100)
 
     const razorpayOrder = await getRazorpay().orders.create({
@@ -46,7 +59,6 @@ export async function POST(request: NextRequest) {
       receipt: `receipt_${courseId}_${userId}_${Date.now()}`,
     })
 
-    // Save a pending purchase record
     await db.purchase.create({
       data: {
         userId,
@@ -57,6 +69,7 @@ export async function POST(request: NextRequest) {
     })
 
     return NextResponse.json({
+      mock: false,
       orderId: razorpayOrder.id,
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,

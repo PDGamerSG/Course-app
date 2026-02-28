@@ -12,9 +12,25 @@ import { Label } from "@/components/ui/label"
 import { Switch } from "@/components/ui/switch"
 import { useToast } from "@/hooks/use-toast"
 
+/** Extract YouTube video ID from a full URL or return the raw ID as-is */
+function extractYouTubeId(input: string): string {
+  const trimmed = input.trim()
+  // Full watch URL: https://www.youtube.com/watch?v=VIDEO_ID
+  const watchMatch = trimmed.match(/[?&]v=([A-Za-z0-9_-]{11})/)
+  if (watchMatch) return watchMatch[1]
+  // Short URL: https://youtu.be/VIDEO_ID
+  const shortMatch = trimmed.match(/youtu\.be\/([A-Za-z0-9_-]{11})/)
+  if (shortMatch) return shortMatch[1]
+  // Embed URL: https://www.youtube.com/embed/VIDEO_ID
+  const embedMatch = trimmed.match(/\/embed\/([A-Za-z0-9_-]{11})/)
+  if (embedMatch) return embedMatch[1]
+  // Assume it's already a raw ID
+  return trimmed
+}
+
 const schema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
-  youtubeVideoId: z.string().min(5, "Please enter a valid YouTube Video ID"),
+  youtubeInput: z.string().min(5, "Please enter a valid YouTube URL or Video ID"),
   duration: z.string().optional(),
   isFree: z.boolean(),
 })
@@ -53,7 +69,7 @@ export default function LessonForm({ courseId, moduleId, onSuccess, onCancel, ex
     resolver: zodResolver(schema),
     defaultValues: {
       title: existingLesson?.title || "",
-      youtubeVideoId: existingLesson?.youtubeVideoId || "",
+      youtubeInput: existingLesson?.youtubeVideoId || "",
       duration: existingLesson?.duration || "",
       isFree: existingLesson?.isFree || false,
     },
@@ -64,18 +80,32 @@ export default function LessonForm({ courseId, moduleId, onSuccess, onCancel, ex
   const onSubmit = async (data: FormData) => {
     setLoading(true)
     try {
+      const youtubeVideoId = extractYouTubeId(data.youtubeInput)
       const payload = {
         title: data.title,
-        youtubeVideoId: data.youtubeVideoId,
+        youtubeVideoId,
         duration: data.duration || undefined,
         isFree: data.isFree,
       }
-      const res = await axios.post(
-        `/api/courses/${courseId}/modules/${moduleId}/lessons`,
-        payload
-      )
-      toast({ title: "Lesson saved!" })
-      onSuccess(res.data)
+
+      let res
+      if (existingLesson) {
+        // Edit mode – PUT with lessonId in body
+        res = await axios.put(
+          `/api/courses/${courseId}/modules/${moduleId}/lessons`,
+          { ...payload, lessonId: existingLesson.id }
+        )
+        toast({ title: "Lesson updated!" })
+        onSuccess(res.data.lesson)
+      } else {
+        // Create mode – POST
+        res = await axios.post(
+          `/api/courses/${courseId}/modules/${moduleId}/lessons`,
+          payload
+        )
+        toast({ title: "Lesson saved!" })
+        onSuccess(res.data.lesson)
+      }
     } catch {
       toast({ title: "Error", description: "Failed to save lesson.", variant: "destructive" })
     } finally {
@@ -97,16 +127,16 @@ export default function LessonForm({ courseId, moduleId, onSuccess, onCancel, ex
           {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
         </div>
 
-        <div className="space-y-1">
-          <Label className="text-xs">YouTube Video ID *</Label>
+        <div className="col-span-2 space-y-1">
+          <Label className="text-xs">YouTube URL or Video ID *</Label>
           <Input
-            placeholder="dQw4w9WgXcQ"
-            {...register("youtubeVideoId")}
+            placeholder="https://youtu.be/dQw4w9WgXcQ  or  dQw4w9WgXcQ"
+            {...register("youtubeInput")}
             disabled={loading}
-            className="h-8 text-sm font-mono"
+            className="h-8 text-sm"
           />
-          {errors.youtubeVideoId && <p className="text-xs text-destructive">{errors.youtubeVideoId.message}</p>}
-          <p className="text-xs text-muted-foreground">Just the ID, e.g. &quot;dQw4w9WgXcQ&quot;</p>
+          {errors.youtubeInput && <p className="text-xs text-destructive">{errors.youtubeInput.message}</p>}
+          <p className="text-xs text-muted-foreground">Paste the full YouTube link or just the video ID</p>
         </div>
 
         <div className="space-y-1">
@@ -135,7 +165,7 @@ export default function LessonForm({ courseId, moduleId, onSuccess, onCancel, ex
       <div className="flex gap-2">
         <Button type="submit" size="sm" disabled={loading}>
           {loading && <Loader2 className="mr-1 h-3 w-3 animate-spin" />}
-          Save Lesson
+          {existingLesson ? "Update Lesson" : "Save Lesson"}
         </Button>
         <Button type="button" variant="ghost" size="sm" onClick={onCancel}>
           Cancel
