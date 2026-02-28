@@ -1,14 +1,10 @@
 "use client"
 
-import { useEffect, useRef, useState, useCallback } from "react"
+import { useEffect, useRef, useState } from "react"
 import axios from "axios"
 import { Skeleton } from "@/components/ui/skeleton"
-import {
-  AlertCircle, Lock, Play, Pause, Volume2, VolumeX,
-  Maximize, Minimize, RotateCcw, ChevronRight, ChevronLeft, Settings,
-} from "lucide-react"
+import { AlertCircle, Lock } from "lucide-react"
 
-/* ── YouTube IFrame API global types ── */
 declare global {
   interface Window {
     YT: {
@@ -24,33 +20,13 @@ interface YTOpts {
   events?: {
     onReady?: (e: { target: YTPlayer }) => void
     onStateChange?: (e: { data: number }) => void
-    onPlaybackQualityChange?: (e: { data: string }) => void
   }
 }
 interface YTPlayer {
-  playVideo(): void
-  pauseVideo(): void
-  seekTo(s: number, allow: boolean): void
-  setVolume(v: number): void
-  mute(): void
-  unMute(): void
-  isMuted(): boolean
-  getVolume(): number
-  setPlaybackRate(r: number): void
   getCurrentTime(): number
   getDuration(): number
   getPlayerState(): number
-  setPlaybackQuality(q: string): void
-  getPlaybackQuality(): string
-  getAvailableQualityLevels(): string[]
   destroy(): void
-}
-
-/* ── helpers ── */
-function fmtTime(s: number) {
-  if (!isFinite(s) || s < 0) return "0:00"
-  const m = Math.floor(s / 60)
-  return `${m}:${Math.floor(s % 60).toString().padStart(2, "0")}`
 }
 
 function loadYT(): Promise<void> {
@@ -67,18 +43,6 @@ function loadYT(): Promise<void> {
   })
 }
 
-const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2]
-
-const ALL_QUALITIES = ["hd2160", "hd1440", "hd1080", "hd720", "large", "medium", "small", "auto"]
-
-const Q_LABEL: Record<string, string> = {
-  hd2160: "4K (2160p)", hd1440: "1440p", hd1080: "1080p HD",
-  hd720: "720p HD", large: "480p", medium: "360p",
-  small: "240p", tiny: "144p", auto: "Auto", default: "Auto",
-}
-
-type SettingsView = "main" | "speed" | "quality"
-
 interface Props {
   lessonId: string
   onProgress?: () => void
@@ -89,29 +53,11 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  /* player state */
-  const [playing, setPlaying] = useState(false)
-  const [current, setCurrent] = useState(0)
-  const [duration, setDuration] = useState(0)
-  const [volume, setVolume] = useState(100)
-  const [muted, setMuted] = useState(false)
-  const [speed, setSpeed] = useState(1)
-  const [quality, setQuality] = useState("auto")
-  const [qualities, setQualities] = useState<string[]>([])
-  const [showSettings, setShowSettings] = useState(false)
-  const [settingsView, setSettingsView] = useState<SettingsView>("main")
-  const [fullscreen, setFullscreen] = useState(false)
-  const [controlsVisible, setControlsVisible] = useState(true)
-  const [buffering, setBuffering] = useState(false)
-
   const playerRef = useRef<YTPlayer | null>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
   const ytDivRef = useRef<HTMLDivElement>(null)
   const tickRef = useRef<ReturnType<typeof setInterval> | null>(null)
-  const hideRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   const doneRef = useRef(false)
 
-  /* fetch & decode video id */
   useEffect(() => {
     setLoading(true); setError(null); setVideoId(null)
     doneRef.current = false
@@ -125,7 +71,6 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
       .finally(() => setLoading(false))
   }, [lessonId])
 
-  /* init YT player */
   useEffect(() => {
     if (!videoId || !ytDivRef.current) return
     let player: YTPlayer
@@ -135,115 +80,39 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
       player = new window.YT.Player(ytDivRef.current, {
         videoId,
         playerVars: {
-          controls: 0,
+          controls: 1,
           rel: 0,
           modestbranding: 1,
-          showinfo: 0,
           iv_load_policy: 3,
-          disablekb: 1,
-          fs: 0,
           playsinline: 1,
-          cc_load_policy: 0,
           origin: window.location.origin,
         },
         events: {
-          onReady: (e) => {
-            playerRef.current = e.target
-            setDuration(e.target.getDuration())
-            setVolume(e.target.getVolume())
-            const qs = e.target.getAvailableQualityLevels()
-            setQualities(qs?.length ? qs : ALL_QUALITIES)
-            setQuality(e.target.getPlaybackQuality() || "auto")
-          },
-          onPlaybackQualityChange: (e) => setQuality(e.data),
+          onReady: (e) => { playerRef.current = e.target },
           onStateChange: (e) => {
             const S = window.YT.PlayerState
             if (e.data === S.PLAYING) {
-              setPlaying(true); setBuffering(false)
-              const qs = playerRef.current?.getAvailableQualityLevels()
-              if (qs?.length) setQualities(qs)
               tickRef.current = setInterval(() => {
                 const p = playerRef.current; if (!p) return
                 const t = p.getCurrentTime(), d = p.getDuration()
-                setCurrent(t); setDuration(d)
                 if (!doneRef.current && d > 0 && t / d >= 0.9) {
                   doneRef.current = true; onProgress?.()
                 }
-              }, 500)
+              }, 1000)
             } else {
-              setPlaying(false)
               if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null }
-              if (e.data === S.BUFFERING) setBuffering(true)
-              if (e.data === S.ENDED) { onProgress?.(); setCurrent(0) }
+              if (e.data === S.ENDED) onProgress?.()
             }
           },
         },
       })
     })
+
     return () => {
       if (tickRef.current) clearInterval(tickRef.current)
       player?.destroy(); playerRef.current = null
     }
   }, [videoId, onProgress])
-
-  /* fullscreen listener */
-  useEffect(() => {
-    const h = () => setFullscreen(!!document.fullscreenElement)
-    document.addEventListener("fullscreenchange", h)
-    return () => document.removeEventListener("fullscreenchange", h)
-  }, [])
-
-  /* auto-hide controls */
-  const showControls = useCallback(() => {
-    setControlsVisible(true)
-    if (hideRef.current) clearTimeout(hideRef.current)
-    hideRef.current = setTimeout(() => {
-      if (playerRef.current?.getPlayerState() === window.YT?.PlayerState?.PLAYING)
-        setControlsVisible(false)
-    }, 3000)
-  }, [])
-
-  const togglePlay = useCallback(() => {
-    const p = playerRef.current; if (!p) return
-    if (p.getPlayerState() === window.YT.PlayerState.PLAYING) { p.pauseVideo() } else { p.playVideo() }
-    showControls()
-  }, [showControls])
-
-  const seek = useCallback((v: number) => {
-    playerRef.current?.seekTo(v, true); setCurrent(v)
-  }, [])
-
-  const changeVolume = useCallback((v: number) => {
-    const p = playerRef.current; if (!p) return
-    p.setVolume(v); setVolume(v)
-    if (v === 0) { p.mute(); setMuted(true) } else { p.unMute(); setMuted(false) }
-  }, [])
-
-  const toggleMute = useCallback(() => {
-    const p = playerRef.current; if (!p) return
-    if (muted) { p.unMute(); setMuted(false); const v = volume || 80; p.setVolume(v); setVolume(v) }
-    else { p.mute(); setMuted(true) }
-  }, [muted, volume])
-
-  const changeSpeed = useCallback((s: number) => {
-    playerRef.current?.setPlaybackRate(s); setSpeed(s)
-    setSettingsView("main")
-  }, [])
-
-  const changeQuality = useCallback((q: string) => {
-    playerRef.current?.setPlaybackQuality(q); setQuality(q)
-    setSettingsView("main")
-  }, [])
-
-  const toggleFS = useCallback(() => {
-    if (!containerRef.current) return
-    if (!document.fullscreenElement) containerRef.current.requestFullscreen().catch(() => {})
-    else document.exitFullscreen()
-  }, [])
-
-  const closeSettings = useCallback(() => {
-    setShowSettings(false); setSettingsView("main")
-  }, [])
 
   if (loading) return (
     <div className="w-full aspect-video rounded-xl overflow-hidden bg-zinc-900">
@@ -259,221 +128,22 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
     </div>
   )
 
-  const pct = duration > 0 ? (current / duration) * 100 : 0
-
   return (
     <div
-      ref={containerRef}
-      className="relative w-full aspect-video rounded-xl overflow-hidden bg-black select-none focus:outline-none"
-      onMouseMove={showControls}
-      onMouseLeave={() => playing && setControlsVisible(false)}
-      onKeyDown={(e) => {
-        if (e.code === "Space") { e.preventDefault(); togglePlay() }
-        if (e.code === "ArrowRight") seek(Math.min(duration, current + 10))
-        if (e.code === "ArrowLeft") seek(Math.max(0, current - 10))
-        if (e.code === "KeyF") toggleFS()
-        if (e.code === "KeyM") toggleMute()
-      }}
-      tabIndex={0}
+      className="relative w-full aspect-video rounded-xl overflow-hidden bg-black"
+      onContextMenu={(e) => e.preventDefault()}
     >
-      {/*
-        YouTube iframe — expanded 10% beyond container bounds.
-        Parent overflow:hidden clips it, so YouTube's corner branding
-        is pushed outside the visible area without any black borders.
-        pointer-events:none ensures YouTube never receives mouse events
-        → Watch Later / Share buttons can never be triggered.
-      */}
-      <div
-        ref={ytDivRef}
-        className="absolute inset-0 w-full h-full pointer-events-none"
-      />
+      {/* YouTube iframe with native controls */}
+      <div ref={ytDivRef} className="absolute inset-0 w-full h-full" />
 
       {/*
-        Full interaction capture layer — sits over the iframe.
-        Because iframe has pointer-events:none, all mouse interaction
-        (including hover) goes to this div, not YouTube.
+        Transparent overlay covering only the top ~13% of the player.
+        YouTube renders the "Watch on YouTube" button and Share icon in
+        this top hover-bar. This overlay intercepts those clicks so users
+        cannot navigate to youtube.com. The bottom controls (progress bar,
+        play/pause, volume, quality, speed, fullscreen) are fully usable.
       */}
-      <div
-        className="absolute inset-0 z-10 cursor-pointer"
-        onClick={() => { if (showSettings) { closeSettings(); return } togglePlay() }}
-        onDoubleClick={toggleFS}
-        onContextMenu={(e) => e.preventDefault()}
-      />
-
-      {/* buffering spinner */}
-      {buffering && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-          <div className="w-11 h-11 rounded-full border-[3px] border-white/20 border-t-white animate-spin" />
-        </div>
-      )}
-
-      {/* centre play/pause indicator */}
-      {!playing && !buffering && (
-        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-          <div className="w-16 h-16 rounded-full bg-black/60 border border-white/20 flex items-center justify-center backdrop-blur-sm">
-            <Play className="h-7 w-7 text-white fill-white ml-1" />
-          </div>
-        </div>
-      )}
-
-      {/* ── Controls bar ── */}
-      <div
-        className={`absolute bottom-0 left-0 right-0 z-30 transition-opacity duration-300 ${
-          controlsVisible ? "opacity-100" : "opacity-0 pointer-events-none"
-        }`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/50 to-transparent pointer-events-none rounded-b-xl" />
-
-        <div className="relative px-4 pb-3 pt-10 space-y-2.5">
-          {/* Progress bar */}
-          <div className="relative group/prog h-1 flex items-center">
-            <div className="absolute inset-0 h-1 rounded-full bg-white/20" />
-            <div className="absolute top-0 left-0 h-1 rounded-full bg-white" style={{ width: `${pct}%` }} />
-            <input
-              type="range"
-              min={0}
-              max={duration || 100}
-              step={0.5}
-              value={current}
-              onChange={(e) => seek(Number(e.target.value))}
-              className="absolute inset-0 w-full opacity-0 cursor-pointer h-4 -top-1.5"
-            />
-          </div>
-
-          {/* Buttons */}
-          <div className="flex items-center gap-3">
-            {/* Play/Pause */}
-            <button onClick={togglePlay} className="text-white hover:scale-110 transition-transform shrink-0">
-              {playing
-                ? <Pause className="h-5 w-5 fill-white stroke-none" />
-                : <Play className="h-5 w-5 fill-white stroke-none" />}
-            </button>
-
-            {/* Rewind */}
-            <button onClick={() => seek(Math.max(0, current - 10))} className="text-white/80 hover:text-white transition-colors shrink-0" title="Back 10s">
-              <RotateCcw className="h-4 w-4" />
-            </button>
-
-            {/* Volume */}
-            <div className="flex items-center gap-1.5 group/vol shrink-0">
-              <button onClick={toggleMute} className="text-white hover:scale-110 transition-transform">
-                {muted || volume === 0 ? <VolumeX className="h-5 w-5" /> : <Volume2 className="h-5 w-5" />}
-              </button>
-              <div className="w-0 overflow-hidden group-hover/vol:w-20 transition-all duration-200">
-                <input
-                  type="range" min={0} max={100}
-                  value={muted ? 0 : volume}
-                  onChange={(e) => changeVolume(Number(e.target.value))}
-                  className="w-20 h-1 cursor-pointer accent-white"
-                />
-              </div>
-            </div>
-
-            {/* Time */}
-            <span className="text-white/70 text-xs font-mono tabular-nums shrink-0">
-              {fmtTime(current)} / {fmtTime(duration)}
-            </span>
-
-            <div className="flex-1" />
-
-            {/* Settings (Speed + Quality) */}
-            <div className="relative shrink-0">
-              <button
-                onClick={() => { setShowSettings(!showSettings); setSettingsView("main") }}
-                className="text-white/75 hover:text-white transition-colors"
-                aria-label="Settings"
-              >
-                <Settings className={`h-4.5 w-4.5 transition-transform duration-300 ${showSettings ? "rotate-45" : ""}`} style={{ width: 18, height: 18 }} />
-              </button>
-
-              {showSettings && (
-                <div className="absolute bottom-8 right-0 bg-zinc-900/95 backdrop-blur border border-white/10 rounded-xl shadow-2xl overflow-hidden w-52">
-
-                  {/* Main settings view */}
-                  {settingsView === "main" && (
-                    <div className="py-1">
-                      <button
-                        onClick={() => setSettingsView("speed")}
-                        className="flex items-center justify-between w-full px-4 py-2.5 text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-                      >
-                        <span>Playback Speed</span>
-                        <span className="flex items-center gap-1 text-white/50 text-xs">
-                          {speed === 1 ? "Normal" : `${speed}x`}
-                          <ChevronRight className="h-3.5 w-3.5" />
-                        </span>
-                      </button>
-                      <button
-                          onClick={() => setSettingsView("quality")}
-                          className="flex items-center justify-between w-full px-4 py-2.5 text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors"
-                        >
-                          <span>Quality</span>
-                          <span className="flex items-center gap-1 text-white/50 text-xs">
-                            {Q_LABEL[quality] ?? quality}
-                            <ChevronRight className="h-3.5 w-3.5" />
-                          </span>
-                        </button>
-                    </div>
-                  )}
-
-                  {/* Speed sub-view */}
-                  {settingsView === "speed" && (
-                    <div className="py-1">
-                      <button
-                        onClick={() => setSettingsView("main")}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-white/50 hover:text-white transition-colors border-b border-white/10"
-                      >
-                        <ChevronLeft className="h-3.5 w-3.5" /> Playback Speed
-                      </button>
-                      {SPEEDS.map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => changeSpeed(s)}
-                          className={`flex items-center justify-between w-full px-4 py-2 text-sm transition-colors ${
-                            s === speed ? "text-white bg-white/10 font-semibold" : "text-white/70 hover:bg-white/10 hover:text-white"
-                          }`}
-                        >
-                          <span>{s === 1 ? "Normal" : `${s}x`}</span>
-                          {s === speed && <span className="text-blue-400 text-xs">✓</span>}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-
-                  {/* Quality sub-view */}
-                  {settingsView === "quality" && (
-                    <div className="py-1">
-                      <button
-                        onClick={() => setSettingsView("main")}
-                        className="flex items-center gap-2 w-full px-3 py-2 text-xs text-white/50 hover:text-white transition-colors border-b border-white/10"
-                      >
-                        <ChevronLeft className="h-3.5 w-3.5" /> Quality
-                      </button>
-                      {qualities.map((q) => (
-                        <button
-                          key={q}
-                          onClick={() => changeQuality(q)}
-                          className={`flex items-center justify-between w-full px-4 py-2 text-sm transition-colors ${
-                            q === quality ? "text-white bg-white/10 font-semibold" : "text-white/70 hover:bg-white/10 hover:text-white"
-                          }`}
-                        >
-                          <span>{Q_LABEL[q] ?? q}</span>
-                          {q === quality && <span className="text-blue-400 text-xs">✓</span>}
-                        </button>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              )}
-            </div>
-
-            {/* Fullscreen */}
-            <button onClick={toggleFS} className="text-white/75 hover:text-white transition-colors shrink-0" aria-label="Fullscreen">
-              {fullscreen ? <Minimize className="h-5 w-5" /> : <Maximize className="h-5 w-5" />}
-            </button>
-          </div>
-        </div>
-      </div>
+      <div className="absolute top-0 left-0 right-0 z-10" style={{ height: "13%" }} />
     </div>
   )
 }
