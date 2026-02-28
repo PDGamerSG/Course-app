@@ -32,6 +32,7 @@ const schema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   youtubeInput: z.string().min(5, "Please enter a valid YouTube URL or Video ID"),
   duration: z.string().optional(),
+  notesUrl: z.string().optional(),
   isFree: z.boolean(),
 })
 
@@ -42,6 +43,7 @@ interface LessonData {
   title: string
   youtubeVideoId: string
   duration: string | null
+  notesUrl: string | null
   order: number
   isFree: boolean
   moduleId: string
@@ -71,6 +73,7 @@ export default function LessonForm({ courseId, moduleId, onSuccess, onCancel, ex
       title: existingLesson?.title || "",
       youtubeInput: existingLesson?.youtubeVideoId || "",
       duration: existingLesson?.duration || "",
+      notesUrl: existingLesson?.notesUrl || "",
       isFree: existingLesson?.isFree || false,
     },
   })
@@ -85,6 +88,7 @@ export default function LessonForm({ courseId, moduleId, onSuccess, onCancel, ex
         title: data.title,
         youtubeVideoId,
         duration: data.duration || undefined,
+        notesUrl: data.notesUrl || undefined,
         isFree: data.isFree,
       }
 
@@ -147,6 +151,17 @@ export default function LessonForm({ courseId, moduleId, onSuccess, onCancel, ex
             disabled={loading}
             className="h-8 text-sm"
           />
+        </div>
+
+        <div className="col-span-2 space-y-1">
+          <Label className="text-xs">Notes / Resources Link (optional)</Label>
+          <Input
+            placeholder="https://drive.google.com/file/d/..."
+            {...register("notesUrl")}
+            disabled={loading}
+            className="h-8 text-sm"
+          />
+          <p className="text-xs text-muted-foreground">Paste a Google Drive or any public link — students will see a Download Notes button</p>
         </div>
       </div>
 

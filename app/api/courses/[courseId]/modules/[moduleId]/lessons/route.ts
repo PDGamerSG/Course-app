@@ -8,6 +8,7 @@ const createLessonSchema = z.object({
   title: z.string().min(1, "Title is required"),
   youtubeVideoId: z.string().min(1, "YouTube video ID is required"),
   duration: z.string().optional(),
+  notesUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   isFree: z.boolean().optional(),
   order: z.number().int().min(0).optional(),
 })
@@ -16,6 +17,7 @@ const updateLessonSchema = z.object({
   title: z.string().min(1).optional(),
   youtubeVideoId: z.string().min(1).optional(),
   duration: z.string().optional(),
+  notesUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
   isFree: z.boolean().optional(),
 })
 
@@ -70,7 +72,7 @@ export async function POST(
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, youtubeVideoId, duration, isFree, order: providedOrder } = parsed.data
+    const { title, youtubeVideoId, duration, notesUrl, isFree, order: providedOrder } = parsed.data
 
     let lessonOrder = providedOrder
     if (lessonOrder === undefined) {
@@ -86,6 +88,7 @@ export async function POST(
         title,
         youtubeVideoId,
         duration,
+        notesUrl: notesUrl || null,
         isFree: isFree ?? false,
         order: lessonOrder,
         moduleId,
@@ -143,11 +146,11 @@ export async function PUT(
       return NextResponse.json({ error: singleParsed.error.flatten() }, { status: 400 })
     }
 
-    const { lessonId, ...data } = singleParsed.data
+    const { lessonId, notesUrl, ...rest } = singleParsed.data
 
     const updated = await db.lesson.update({
       where: { id: lessonId, moduleId },
-      data,
+      data: { ...rest, ...(notesUrl !== undefined ? { notesUrl: notesUrl || null } : {}) },
     })
 
     return NextResponse.json({ lesson: updated })

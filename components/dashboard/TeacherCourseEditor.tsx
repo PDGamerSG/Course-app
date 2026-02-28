@@ -23,6 +23,7 @@ interface Lesson {
   title: string
   youtubeVideoId: string
   duration: string | null
+  notesUrl: string | null
   order: number
   isFree: boolean
   moduleId: string

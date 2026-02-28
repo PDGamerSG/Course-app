@@ -1,6 +1,6 @@
 import { notFound, redirect } from "next/navigation"
 import Link from "next/link"
-import { ChevronLeft, ChevronRight, Menu, BookOpen } from "lucide-react"
+import { ChevronLeft, ChevronRight, Menu, BookOpen, Download } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import VideoPlayer from "@/components/shared/VideoPlayer"
@@ -44,7 +44,7 @@ export default async function LearnPage({
   try {
     lesson = await db.lesson.findUnique({
       where: { id: params.lessonId },
-      select: { id: true, title: true, duration: true, isFree: true, moduleId: true },
+      select: { id: true, title: true, duration: true, isFree: true, moduleId: true, notesUrl: true },
     })
   } catch {
     return notFound()
@@ -158,6 +158,18 @@ export default async function LearnPage({
                 nextLessonId={nextLesson?.id}
               />
             </div>
+
+            {lesson.notesUrl && (
+              <a
+                href={lesson.notesUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-sm font-medium transition-colors"
+              >
+                <Download className="h-4 w-4" />
+                Download Notes
+              </a>
+            )}
           </div>
         </div>
       </div>

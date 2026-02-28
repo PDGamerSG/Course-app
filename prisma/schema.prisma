@@ -60,6 +60,7 @@ model Lesson {
   title          String
   youtubeVideoId String
   duration       String?
+  notesUrl       String?
   order          Int
   isFree         Boolean    @default(false)
   moduleId       String
