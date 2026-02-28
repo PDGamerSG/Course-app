@@ -69,6 +69,8 @@ function loadYT(): Promise<void> {
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
+const ALL_QUALITIES = ["hd2160", "hd1440", "hd1080", "hd720", "large", "medium", "small", "auto"]
+
 const Q_LABEL: Record<string, string> = {
   hd2160: "4K (2160p)", hd1440: "1440p", hd1080: "1080p HD",
   hd720: "720p HD", large: "480p", medium: "360p",
@@ -150,7 +152,7 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
             setDuration(e.target.getDuration())
             setVolume(e.target.getVolume())
             const qs = e.target.getAvailableQualityLevels()
-            if (qs?.length) setQualities(qs)
+            setQualities(qs?.length ? qs : ALL_QUALITIES)
             setQuality(e.target.getPlaybackQuality() || "auto")
           },
           onPlaybackQualityChange: (e) => setQuality(e.data),
@@ -158,7 +160,6 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
             const S = window.YT.PlayerState
             if (e.data === S.PLAYING) {
               setPlaying(true); setBuffering(false)
-              /* refresh qualities once playing (they load late) */
               const qs = playerRef.current?.getAvailableQualityLevels()
               if (qs?.length) setQualities(qs)
               tickRef.current = setInterval(() => {
@@ -284,8 +285,7 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
       */}
       <div
         ref={ytDivRef}
-        className="absolute pointer-events-none"
-        style={{ top: "-5%", left: "-5%", width: "110%", height: "110%" }}
+        className="absolute inset-0 w-full h-full pointer-events-none"
       />
 
       {/*
@@ -403,8 +403,7 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
                           <ChevronRight className="h-3.5 w-3.5" />
                         </span>
                       </button>
-                      {qualities.length > 0 && (
-                        <button
+                      <button
                           onClick={() => setSettingsView("quality")}
                           className="flex items-center justify-between w-full px-4 py-2.5 text-sm text-white/80 hover:bg-white/10 hover:text-white transition-colors"
                         >
@@ -414,7 +413,6 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
                             <ChevronRight className="h-3.5 w-3.5" />
                           </span>
                         </button>
-                      )}
                     </div>
                   )}
 
