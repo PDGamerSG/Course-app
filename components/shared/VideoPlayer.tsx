@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton"
 import {
   AlertCircle, Lock, Play, Pause,
   Volume2, VolumeX, Maximize, Minimize,
-  RotateCcw, Settings, ChevronLeft, ChevronRight,
+  RotateCcw, Settings,
 } from "lucide-react"
 
 /* ─── YT IFrame API types ─── */
@@ -68,15 +68,6 @@ function fmt(s: number) {
 
 const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 2]
 
-const Q_LABEL: Record<string, string> = {
-  hd2160: "4K", hd1440: "1440p", hd1080: "1080p",
-  hd720: "720p", large: "480p", medium: "360p",
-  small: "240p", tiny: "144p", auto: "Auto",
-}
-const DEFAULT_QUALITIES = ["hd1080", "hd720", "large", "medium", "small", "auto"]
-
-type Panel = "speed" | "quality" | null
-
 interface Props { lessonId: string; onProgress?: () => void }
 
 export default function VideoPlayer({ lessonId, onProgress }: Props) {
@@ -90,9 +81,7 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
   const [volume, setVolume]     = useState(100)
   const [muted, setMuted]       = useState(false)
   const [speed, setSpeed]       = useState(1)
-  const [quality, setQuality]   = useState("auto")
-  const [qualities, setQualities] = useState<string[]>(DEFAULT_QUALITIES)
-  const [panel, setPanel]       = useState<Panel>(null)
+  const [showSpeed, setShowSpeed] = useState(false)
   const [fullscreen, setFullscreen] = useState(false)
   const [ctrlVisible, setCtrlVisible] = useState(true)
 
@@ -136,16 +125,11 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
             playerRef.current = e.target
             setVolume(e.target.getVolume())
             setDuration(e.target.getDuration())
-            const qs = e.target.getAvailableQualityLevels()
-            if (qs?.length) setQualities(qs)
-            setQuality(e.target.getPlaybackQuality() || "auto")
           },
           onStateChange: (e) => {
             const S = window.YT.PlayerState
             if (e.data === S.PLAYING) {
               setPlaying(true); setBuffering(false)
-              const qs = playerRef.current?.getAvailableQualityLevels()
-              if (qs?.length) { setQualities(qs); setQuality(playerRef.current?.getPlaybackQuality() || "auto") }
               tickRef.current = setInterval(() => {
                 const p = playerRef.current; if (!p) return
                 const t = p.getCurrentTime(), d = p.getDuration()
@@ -250,7 +234,7 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
       {/* click / interaction layer */}
       <div
         className="absolute inset-0 z-10 cursor-pointer"
-        onClick={() => { setPanel(null); togglePlay() }}
+        onClick={() => { setShowSpeed(false); togglePlay() }}
         onDoubleClick={toggleFS}
       />
 
@@ -317,66 +301,33 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
 
             <div className="flex-1" />
 
-            {/* Settings: Speed & Quality */}
+            {/* Speed */}
             <div className="relative shrink-0">
               <button
-                onClick={() => setPanel(panel ? null : "speed")}
+                onClick={() => setShowSpeed(!showSpeed)}
                 className="flex items-center gap-1 text-white/70 hover:text-white text-xs font-medium transition-colors px-2 py-1 rounded-md hover:bg-white/10"
               >
                 <Settings className="h-3.5 w-3.5" />
-                {panel === "quality" ? (Q_LABEL[quality] ?? quality) : (speed === 1 ? "Speed" : `${speed}x`)}
+                {speed === 1 ? "Speed" : `${speed}x`}
               </button>
 
-              {panel && (
-                <div className="absolute bottom-9 right-0 bg-zinc-900/95 backdrop-blur border border-white/10 rounded-xl shadow-2xl overflow-hidden w-40">
-
-                  {/* Speed panel */}
-                  {panel === "speed" && (
-                    <>
-                      <div className="flex items-center justify-between px-3 py-2 border-b border-white/10">
-                        <span className="text-xs text-white/50 font-medium">Playback Speed</span>
-                        <button onClick={() => setPanel("quality")} className="text-xs text-white/40 hover:text-white flex items-center gap-0.5">
-                          Quality <ChevronRight className="h-3 w-3" />
-                        </button>
-                      </div>
-                      {SPEEDS.map((s) => (
-                        <button
-                          key={s}
-                          onClick={() => { playerRef.current?.setPlaybackRate(s); setSpeed(s); setPanel(null) }}
-                          className={`flex items-center justify-between w-full px-4 py-2 text-sm transition-colors ${
-                            s === speed ? "text-white bg-white/10 font-semibold" : "text-white/70 hover:bg-white/10 hover:text-white"
-                          }`}
-                        >
-                          <span>{s === 1 ? "Normal" : `${s}x`}</span>
-                          {s === speed && <span className="text-blue-400 text-xs">✓</span>}
-                        </button>
-                      ))}
-                    </>
-                  )}
-
-                  {/* Quality panel */}
-                  {panel === "quality" && (
-                    <>
-                      <div className="flex items-center justify-between px-3 py-2 border-b border-white/10">
-                        <button onClick={() => setPanel("speed")} className="text-xs text-white/40 hover:text-white flex items-center gap-0.5">
-                          <ChevronLeft className="h-3 w-3" /> Speed
-                        </button>
-                        <span className="text-xs text-white/50 font-medium">Quality</span>
-                      </div>
-                      {qualities.map((q) => (
-                        <button
-                          key={q}
-                          onClick={() => { playerRef.current?.setPlaybackQuality(q); setQuality(q); setPanel(null) }}
-                          className={`flex items-center justify-between w-full px-4 py-2 text-sm transition-colors ${
-                            q === quality ? "text-white bg-white/10 font-semibold" : "text-white/70 hover:bg-white/10 hover:text-white"
-                          }`}
-                        >
-                          <span>{Q_LABEL[q] ?? q}</span>
-                          {q === quality && <span className="text-blue-400 text-xs">✓</span>}
-                        </button>
-                      ))}
-                    </>
-                  )}
+              {showSpeed && (
+                <div className="absolute bottom-9 right-0 bg-zinc-900/95 backdrop-blur border border-white/10 rounded-xl shadow-2xl overflow-hidden w-36">
+                  <div className="px-3 py-2 border-b border-white/10">
+                    <span className="text-xs text-white/50 font-medium">Playback Speed</span>
+                  </div>
+                  {SPEEDS.map((s) => (
+                    <button
+                      key={s}
+                      onClick={() => { playerRef.current?.setPlaybackRate(s); setSpeed(s); setShowSpeed(false) }}
+                      className={`flex items-center justify-between w-full px-4 py-2 text-sm transition-colors ${
+                        s === speed ? "text-white bg-white/10 font-semibold" : "text-white/70 hover:bg-white/10 hover:text-white"
+                      }`}
+                    >
+                      <span>{s === 1 ? "Normal" : `${s}x`}</span>
+                      {s === speed && <span className="text-blue-400 text-xs">✓</span>}
+                    </button>
+                  ))}
                 </div>
               )}
             </div>

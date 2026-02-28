@@ -160,15 +160,24 @@ export default async function LearnPage({
             </div>
 
             {lesson.notesUrl && (
-              <a
-                href={lesson.notesUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-2 px-4 py-2.5 rounded-lg bg-primary/10 hover:bg-primary/20 border border-primary/20 text-primary text-sm font-medium transition-colors"
-              >
-                <Download className="h-4 w-4" />
-                Download Notes
-              </a>
+              <div className="rounded-xl border border-border bg-muted/30 p-4 flex items-center gap-4">
+                <div className="flex-shrink-0 w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                  <Download className="h-5 w-5 text-primary" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="font-medium text-sm">Lecture Notes</p>
+                  <p className="text-xs text-muted-foreground mt-0.5">Download the notes and resources for this lesson</p>
+                </div>
+                <a
+                  href={lesson.notesUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex-shrink-0 inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
+                >
+                  <Download className="h-4 w-4" />
+                  Download
+                </a>
+              </div>
             )}
           </div>
         </div>
