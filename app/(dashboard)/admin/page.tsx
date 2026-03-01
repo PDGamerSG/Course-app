@@ -6,7 +6,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import AdminCourseActions from "@/components/dashboard/AdminCourseActions"
-import AdminUserActions from "@/components/dashboard/AdminUserActions"
 import Image from "next/image"
 import { BookOpen, GraduationCap, Plus, Pencil } from "lucide-react"
 
@@ -16,26 +15,15 @@ export default async function AdminDashboard() {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let allCourses: any[] = []
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let allUsers: any[] = []
   try {
-    [allCourses, allUsers] = await Promise.all([
-      db.course.findMany({
+    allCourses = await db.course.findMany({
         include: {
           teacher: { select: { id: true, name: true, email: true, image: true } },
           modules: { include: { lessons: { select: { id: true } } } },
           _count: { select: { enrollments: true } },
         },
         orderBy: { createdAt: "desc" },
-      }),
-      db.user.findMany({
-        orderBy: { createdAt: "desc" },
-        select: {
-          id: true, name: true, email: true, image: true, role: true, createdAt: true,
-          _count: { select: { enrollments: true } },
-        },
-      }),
-    ])
+      })
   } catch {
     // DB not connected yet
   }
@@ -152,7 +140,6 @@ export default async function AdminDashboard() {
             All Courses
             <Badge variant="secondary" className="ml-1 h-4 px-1.5 text-xs">{allCourses.length}</Badge>
           </TabsTrigger>
-          <TabsTrigger value="users">Users</TabsTrigger>
         </TabsList>
 
         <TabsContent value="foundation">
@@ -185,54 +172,6 @@ export default async function AdminDashboard() {
           )}
         </TabsContent>
 
-        <TabsContent value="users">
-          <div className="border border-border/50 rounded-lg overflow-hidden">
-            <table className="w-full">
-              <thead className="border-b border-border/50 bg-muted/30">
-                <tr>
-                  <th className="text-left p-3 text-sm font-medium text-muted-foreground">User</th>
-                  <th className="text-left p-3 text-sm font-medium text-muted-foreground">Email</th>
-                  <th className="text-left p-3 text-sm font-medium text-muted-foreground">Role</th>
-                  <th className="text-left p-3 text-sm font-medium text-muted-foreground">Enrollments</th>
-                  <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {allUsers.map((user) => (
-                  <tr key={user.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="p-3">
-                      <div className="flex items-center gap-2">
-                        <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center overflow-hidden flex-shrink-0">
-                          {user.image ? (
-                            <Image src={user.image} alt={user.name || ""} width={32} height={32} />
-                          ) : (
-                            <span className="text-xs font-bold text-primary">
-                              {user.name?.[0]?.toUpperCase() || "U"}
-                            </span>
-                          )}
-                        </div>
-                        <span className="text-sm font-medium">{user.name || "Unknown"}</span>
-                      </div>
-                    </td>
-                    <td className="p-3 text-sm text-muted-foreground">{user.email}</td>
-                    <td className="p-3">
-                      <Badge
-                        variant={user.role === "ADMIN" ? "default" : user.role === "TEACHER" ? "secondary" : "outline"}
-                        className="text-xs"
-                      >
-                        {user.role}
-                      </Badge>
-                    </td>
-                    <td className="p-3 text-sm text-muted-foreground">{user._count.enrollments}</td>
-                    <td className="p-3">
-                      <AdminUserActions userId={user.id} currentRole={user.role} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </TabsContent>
       </Tabs>
     </div>
   )
