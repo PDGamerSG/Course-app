@@ -67,3 +67,40 @@ export interface CourseProgress {
   percentage: number
   nextLessonId: string | null
 }
+
+// ── Query result types (avoids Prisma namespace imports) ──────────────────────
+
+export interface CourseListing {
+  id: string
+  title: string
+  description: string
+  thumbnail: string | null
+  price: number
+  level: string
+  subject: string | null
+  instructorName: string | null
+  isPublished: boolean
+  isApproved: boolean
+  createdAt: Date
+  teacher: { id: string; name: string | null; image: string | null }
+  modules: { id: string; title: string; order: number; lessons: { id: string }[] }[]
+  _count: { enrollments: number }
+}
+
+export interface AdminCourseListing extends CourseListing {
+  teacher: { id: string; name: string | null; email: string | null; image: string | null }
+}
+
+export interface EnrollmentWithCourse {
+  id: string
+  userId: string
+  courseId: string
+  createdAt: Date
+  course: {
+    id: string
+    title: string
+    thumbnail: string | null
+    teacher: { name: string | null }
+    modules: { id: string; lessons: { id: string }[] }[]
+  }
+}

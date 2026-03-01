@@ -2,24 +2,13 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { BookOpen, PlayCircle } from "lucide-react"
-import type { Prisma } from "@prisma/client"
+import type { EnrollmentWithCourse } from "@/types"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { Progress } from "@/components/ui/progress"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
-
-type EnrollmentWithCourse = Prisma.EnrollmentGetPayload<{
-  include: {
-    course: {
-      include: {
-        teacher: { select: { name: true } }
-        modules: { include: { lessons: { select: { id: true } } } }
-      }
-    }
-  }
-}>
 
 export default async function StudentDashboard() {
   const session = await auth()
@@ -43,7 +32,7 @@ export default async function StudentDashboard() {
         },
       },
       orderBy: { createdAt: "desc" },
-    })
+    }) as EnrollmentWithCourse[]
     const progressRecords = await db.progress.findMany({
       where: { userId: session.user.id, completed: true },
       select: { lessonId: true },

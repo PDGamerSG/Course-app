@@ -1,23 +1,15 @@
 import Link from "next/link"
 import { ArrowRight, BookOpen, Users, Shield, TrendingUp, Globe, CheckCircle, GraduationCap, FlaskConical, LayoutDashboard, Sparkles, Award, Play, Star } from "lucide-react"
-import type { Prisma } from "@prisma/client"
+import type { CourseListing } from "@/types"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import CourseCard from "@/components/shared/CourseCard"
 import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
 
-type CourseItem = Prisma.CourseGetPayload<{
-  include: {
-    teacher: { select: { id: true; name: true; image: true } }
-    modules: { include: { lessons: { select: { id: true } } } }
-    _count: { select: { enrollments: true } }
-  }
-}>
-
 export const dynamic = "force-dynamic"
 
-async function getProgramData(): Promise<CourseItem[]> {
+async function getProgramData(): Promise<CourseListing[]> {
   try {
     const courses = await db.course.findMany({
       where: { isPublished: true },
@@ -28,7 +20,7 @@ async function getProgramData(): Promise<CourseItem[]> {
       },
       orderBy: { createdAt: "desc" },
     })
-    return courses
+    return courses as CourseListing[]
   } catch {
     return []
   }

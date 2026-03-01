@@ -1,16 +1,8 @@
 import { Search, BookOpen, SlidersHorizontal, GraduationCap, Sparkles } from "lucide-react"
-import type { Prisma } from "@prisma/client"
+import type { CourseListing } from "@/types"
 import CourseCard from "@/components/shared/CourseCard"
 import { db } from "@/lib/db"
 import { cn } from "@/lib/utils"
-
-type CourseItem = Prisma.CourseGetPayload<{
-  include: {
-    teacher: { select: { id: true; name: true; image: true } }
-    modules: { include: { lessons: { select: { id: true } } } }
-    _count: { select: { enrollments: true } }
-  }
-}>
 
 export const dynamic = "force-dynamic"
 
@@ -19,7 +11,7 @@ interface SearchParams {
   search?: string
 }
 
-async function getCourses(level?: string, search?: string): Promise<CourseItem[]> {
+async function getCourses(level?: string, search?: string): Promise<CourseListing[]> {
   try {
     return await db.course.findMany({
       where: {
@@ -33,7 +25,7 @@ async function getCourses(level?: string, search?: string): Promise<CourseItem[]
         _count: { select: { enrollments: true } },
       },
       orderBy: { createdAt: "desc" },
-    })
+    }) as CourseListing[]
   } catch {
     return []
   }
