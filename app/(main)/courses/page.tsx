@@ -157,45 +157,45 @@ export default async function CoursesPage({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                   {foundationCourses.map((course) => {
-                    const lessonCount = course.modules.reduce((sum: number, m) => sum + m.lessons.length, 0)
+                    const lessonCount = course.modules.reduce((sum: number, m: { lessons: unknown[] }) => sum + m.lessons.length, 0)
                     return (
-                      <CourseCard
-                        key={course.id}
-                        id={course.id}
-                        title={course.title}
-                        description={course.description}
-                        thumbnail={course.thumbnail}
-                        price={course.price}
-                        teacher={course.teacher}
-                        instructorName={course.instructorName}
-                        lessonCount={lessonCount}
-                        enrollmentCount={course._count.enrollments}
-                        subject={course.subject ?? undefined}
-                      />
-                    )
-                  })}
-                </div>
-              </section>
-            )}
+                       <CourseCard
+                         key={course.id}
+                         id={course.id}
+                         title={course.title}
+                         description={course.description}
+                         thumbnail={course.thumbnail}
+                         price={course.price}
+                         teacher={course.teacher}
+                         instructorName={course.instructorName}
+                         lessonCount={lessonCount}
+                         enrollmentCount={course._count.enrollments}
+                         subject={course.subject ?? undefined}
+                       />
+                     )
+                   })}
+                 </div>
+               </section>
+             )}
 
-            {/* Diploma Section */}
-            {showDiploma && diplomaCourses.length > 0 && (
-              <section>
-                <div className="flex items-center gap-3 mb-7 pb-4 border-b border-border/50">
-                  <div className="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
-                    <GraduationCap className="h-5 w-5 text-indigo-500" />
-                  </div>
-                  <div>
-                    <h2 className="text-xl font-black">Diploma Program</h2>
-                    <p className="text-sm text-muted-foreground">Advanced specializations — go deeper</p>
-                  </div>
-                  <span className="ml-auto text-sm font-semibold text-muted-foreground bg-muted px-3 py-1 rounded-lg">
-                    {diplomaCourses.length} course{diplomaCourses.length !== 1 ? "s" : ""}
-                  </span>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-                  {diplomaCourses.map((course) => {
-                    const lessonCount = course.modules.reduce((sum: number, m) => sum + m.lessons.length, 0)
+             {/* Diploma Section */}
+             {showDiploma && diplomaCourses.length > 0 && (
+               <section>
+                 <div className="flex items-center gap-3 mb-7 pb-4 border-b border-border/50">
+                   <div className="w-11 h-11 rounded-xl bg-indigo-500/10 border border-indigo-500/20 flex items-center justify-center">
+                     <GraduationCap className="h-5 w-5 text-indigo-500" />
+                   </div>
+                   <div>
+                     <h2 className="text-xl font-black">Diploma Program</h2>
+                     <p className="text-sm text-muted-foreground">Advanced specializations — go deeper</p>
+                   </div>
+                   <span className="ml-auto text-sm font-semibold text-muted-foreground bg-muted px-3 py-1 rounded-lg">
+                     {diplomaCourses.length} course{diplomaCourses.length !== 1 ? "s" : ""}
+                   </span>
+                 </div>
+                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
+                   {diplomaCourses.map((course) => {
+                    const lessonCount = course.modules.reduce((sum: number, m: { lessons: unknown[] }) => sum + m.lessons.length, 0)
                     return (
                       <CourseCard
                         key={course.id}

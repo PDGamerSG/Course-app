@@ -80,7 +80,7 @@ export default async function LearnPage({
   }
 
   // Find prev/next lessons
-  const allLessons = course.modules.flatMap((m) => m.lessons)
+  const allLessons = course.modules.flatMap((m: { lessons: { id: string; title: string; duration: string | null; isFree: boolean; order: number }[] }) => m.lessons)
   const currentIndex = allLessons.findIndex((l) => l.id === params.lessonId)
   const prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null
   const nextLesson = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null
