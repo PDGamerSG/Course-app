@@ -37,7 +37,7 @@ export default async function StudentDashboard() {
       where: { userId: session.user.id, completed: true },
       select: { lessonId: true },
     })
-    completedLessonIds = new Set(progressRecords.map((p) => p.lessonId))
+    completedLessonIds = new Set(progressRecords.map((p: { lessonId: string }) => p.lessonId))
   } catch {
     // DB not connected yet — show empty state
   }
