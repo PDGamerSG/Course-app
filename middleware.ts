@@ -23,7 +23,7 @@ export default auth((req) => {
   }
 
   // Redirect logged-in users away from auth pages
-  if ((pathname === "/login" || pathname === "/register") && isLoggedIn) {
+  if ((pathname === "/login" || pathname === "/register" || pathname === "/forgot-password" || pathname === "/reset-password") && isLoggedIn) {
     return NextResponse.redirect(new URL("/dashboard", req.url))
   }
 
@@ -55,5 +55,7 @@ export const config = {
     "/learn/:path*",
     "/login",
     "/register",
+    "/forgot-password",
+    "/reset-password",
   ],
 }
