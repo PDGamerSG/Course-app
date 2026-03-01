@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { Role } from "@prisma/client"
 
 const updateCourseSchema = z.object({
   title: z.string().min(1).optional(),
@@ -45,7 +44,7 @@ export async function GET(
     }
 
     const isTeacher = session?.user?.id === course.teacherId
-    const isAdmin = (session?.user?.role as Role) === Role.ADMIN
+    const isAdmin = (session?.user?.role) === "ADMIN"
 
     if (isTeacher || isAdmin) {
       return NextResponse.json({ course })
@@ -99,7 +98,7 @@ export async function PUT(
     }
 
     const isTeacher = session.user.id === course.teacherId
-    const isAdmin = (session.user.role as Role) === Role.ADMIN
+    const isAdmin = (session.user.role) === "ADMIN"
     if (!isTeacher && !isAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }
@@ -154,7 +153,7 @@ export async function DELETE(
     }
 
     const isTeacher = session.user.id === course.teacherId
-    const isAdmin = (session.user.role as Role) === Role.ADMIN
+    const isAdmin = (session.user.role) === "ADMIN"
     if (!isTeacher && !isAdmin) {
       return NextResponse.json({ error: "Forbidden" }, { status: 403 })
     }

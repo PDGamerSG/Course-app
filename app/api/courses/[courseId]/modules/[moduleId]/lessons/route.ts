@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { Role } from "@prisma/client"
 
 const createLessonSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -30,10 +29,10 @@ const reorderLessonsSchema = z.object({
   ),
 })
 
-async function authorizeForCourse(courseId: string, userId: string, userRole: Role) {
+async function authorizeForCourse(courseId: string, userId: string, userRole: string) {
   const course = await db.course.findUnique({ where: { id: courseId } })
   if (!course) return { course: null, authorized: false }
-  const authorized = course.teacherId === userId || userRole === Role.ADMIN
+  const authorized = course.teacherId === userId || userRole === "ADMIN"
   return { course, authorized }
 }
 
@@ -51,7 +50,7 @@ export async function POST(
     const { course, authorized } = await authorizeForCourse(
       courseId,
       session.user.id as string,
-      session.user.role as Role
+      session.user.role
     )
 
     if (!course) {
@@ -116,7 +115,7 @@ export async function PUT(
     const { course, authorized } = await authorizeForCourse(
       courseId,
       session.user.id as string,
-      session.user.role as Role
+      session.user.role
     )
 
     if (!course) {
@@ -174,7 +173,7 @@ export async function DELETE(
     const { course, authorized } = await authorizeForCourse(
       courseId,
       session.user.id as string,
-      session.user.role as Role
+      session.user.role
     )
 
     if (!course) {

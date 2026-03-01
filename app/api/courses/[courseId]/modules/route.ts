@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { Role } from "@prisma/client"
 
 const createModuleSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -17,10 +16,10 @@ const reorderModulesSchema = z.object({
   ),
 })
 
-async function authorizeForCourse(courseId: string, userId: string, userRole: Role) {
+async function authorizeForCourse(courseId: string, userId: string, userRole: string) {
   const course = await db.course.findUnique({ where: { id: courseId } })
   if (!course) return { course: null, authorized: false }
-  const authorized = course.teacherId === userId || userRole === Role.ADMIN
+  const authorized = course.teacherId === userId || userRole === "ADMIN"
   return { course, authorized }
 }
 
@@ -38,7 +37,7 @@ export async function POST(
     const { course, authorized } = await authorizeForCourse(
       courseId,
       session.user.id as string,
-      session.user.role as Role
+      session.user.role
     )
 
     if (!course) {
@@ -89,7 +88,7 @@ export async function PUT(
     const { course, authorized } = await authorizeForCourse(
       courseId,
       session.user.id as string,
-      session.user.role as Role
+      session.user.role
     )
 
     if (!course) {
@@ -131,7 +130,7 @@ export async function DELETE(
     const moduleId = searchParams.get("moduleId")
     if (!moduleId) return NextResponse.json({ error: "moduleId required" }, { status: 400 })
 
-    const { course, authorized } = await authorizeForCourse(courseId, session.user.id as string, session.user.role as Role)
+    const { course, authorized } = await authorizeForCourse(courseId, session.user.id as string, session.user.role)
     if (!course) return NextResponse.json({ error: "Course not found" }, { status: 404 })
     if (!authorized) return NextResponse.json({ error: "Forbidden" }, { status: 403 })
 

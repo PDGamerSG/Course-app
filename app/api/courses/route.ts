@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { Role } from "@prisma/client"
+
 
 const createCourseSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -68,8 +68,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    const userRole = session.user.role as Role
-    if (userRole !== Role.TEACHER && userRole !== Role.ADMIN) {
+    const userRole = session.user.role
+    if (userRole !== "TEACHER" && userRole !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden: only teachers and admins can create courses" }, { status: 403 })
     }
 

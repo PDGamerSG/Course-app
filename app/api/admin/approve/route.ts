@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server"
 import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import { Role } from "@prisma/client"
 import { sendCourseApprovedEmail, sendCourseRejectedEmail } from "@/lib/resend"
 
 const approveActionSchema = z.object({
@@ -23,7 +22,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    if ((session.user.role as Role) !== Role.ADMIN) {
+    if (session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden: admin access required" }, { status: 403 })
     }
 
@@ -98,7 +97,7 @@ export async function PUT(request: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 })
     }
 
-    if ((session.user.role as Role) !== Role.ADMIN) {
+    if (session.user.role !== "ADMIN") {
       return NextResponse.json({ error: "Forbidden: admin access required" }, { status: 403 })
     }
 
@@ -117,7 +116,7 @@ export async function PUT(request: NextRequest) {
 
     const updated = await db.user.update({
       where: { id: userId },
-      data: { role: role as Role },
+      data: { role: role },
       select: { id: true, name: true, email: true, role: true },
     })
 
