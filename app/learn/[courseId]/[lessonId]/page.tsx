@@ -3,9 +3,8 @@ import Link from "next/link"
 import { ChevronLeft, ChevronRight, Menu, BookOpen, Download } from "lucide-react"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
-import VideoPlayer from "@/components/shared/VideoPlayer"
+import LessonPlayer from "@/components/shared/LessonPlayer"
 import LessonList from "@/components/shared/LessonList"
-import MarkCompleteButton from "@/components/shared/MarkCompleteButton"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
@@ -142,21 +141,20 @@ export default async function LearnPage({
         {/* Video + lesson info */}
         <div className="flex-1 overflow-y-auto">
           <div className="max-w-4xl mx-auto px-4 py-6 space-y-4">
-            <VideoPlayer lessonId={params.lessonId} />
-
-            <div className="flex items-start justify-between gap-4">
-              <div>
-                <h1 className="text-xl font-bold">{lesson.title}</h1>
-                {lesson.duration && (
-                  <p className="text-sm text-muted-foreground mt-1">{lesson.duration}</p>
-                )}
-              </div>
-              <MarkCompleteButton
+            <div className="flex flex-col gap-4">
+              <LessonPlayer
                 lessonId={params.lessonId}
                 courseId={course.id}
                 isCompleted={progress.some((p) => p.lessonId === params.lessonId && p.completed)}
                 nextLessonId={nextLesson?.id}
               />
+            </div>
+
+            <div>
+              <h1 className="text-xl font-bold">{lesson.title}</h1>
+              {lesson.duration && (
+                <p className="text-sm text-muted-foreground mt-1">{lesson.duration}</p>
+              )}
             </div>
 
             {lesson.notesUrl && (
