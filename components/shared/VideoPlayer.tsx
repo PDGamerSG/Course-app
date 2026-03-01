@@ -91,6 +91,9 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
   const tickRef     = useRef<ReturnType<typeof setInterval> | null>(null)
   const hideRef     = useRef<ReturnType<typeof setTimeout> | null>(null)
   const doneRef     = useRef(false)
+  // Keep onProgress in a ref so the YT player effect doesn't re-run when callback changes
+  const onProgressRef = useRef(onProgress)
+  useEffect(() => { onProgressRef.current = onProgress })
 
   /* fetch video id */
   useEffect(() => {
@@ -135,14 +138,14 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
                 const t = p.getCurrentTime(), d = p.getDuration()
                 setCurrent(t); setDuration(d)
                 if (!doneRef.current && d > 0 && t / d >= 0.9) {
-                  doneRef.current = true; onProgress?.()
+                  doneRef.current = true; onProgressRef.current?.()
                 }
               }, 500)
             } else {
               setPlaying(false)
               if (tickRef.current) { clearInterval(tickRef.current); tickRef.current = null }
               if (e.data === S.BUFFERING) setBuffering(true)
-              if (e.data === S.ENDED)     { onProgress?.(); setCurrent(0) }
+              if (e.data === S.ENDED)     { onProgressRef.current?.(); setCurrent(0) }
             }
           },
         },
@@ -152,7 +155,8 @@ export default function VideoPlayer({ lessonId, onProgress }: Props) {
       if (tickRef.current) clearInterval(tickRef.current)
       player?.destroy(); playerRef.current = null
     }
-  }, [videoId, onProgress])
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [videoId])
 
   /* fullscreen listener */
   useEffect(() => {

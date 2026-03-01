@@ -45,7 +45,7 @@ export default async function StudentDashboard() {
   return (
     <div className="p-6 max-w-6xl mx-auto">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold">My Learning</h1>
+        <h1 className="text-3xl font-bold">My Courses</h1>
         <p className="text-muted-foreground mt-1">Continue where you left off</p>
       </div>
 

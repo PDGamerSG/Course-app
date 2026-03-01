@@ -61,7 +61,6 @@ export default async function AdminDashboard() {
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap mb-1">
             <h3 className="font-semibold text-sm">{course.title}</h3>
-            {course.subject && <span className="text-xs text-primary font-medium">{course.subject}</span>}
             <Badge variant={course.isPublished ? "default" : "outline"} className="text-[10px] h-4 px-1.5">
               {course.isPublished ? "Published" : "Draft"}
             </Badge>

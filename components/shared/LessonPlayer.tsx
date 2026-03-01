@@ -52,28 +52,40 @@ export default function LessonPlayer({ lessonId, courseId, isCompleted, nextLess
       <VideoPlayer lessonId={lessonId} onProgress={handleVideoProgress} />
 
       <div className="flex items-center gap-2 flex-shrink-0">
-        <Button
-          variant={completed ? "default" : "outline"}
-          size="sm"
-          onClick={() => markComplete(!completed)}
-          disabled={loading}
-          className="gap-2"
-        >
-          {loading ? (
-            <Loader2 className="h-4 w-4 animate-spin" />
-          ) : completed ? (
+        {completed && nextLessonId ? (
+          // Video done + next lesson exists → show Next button with completed indicator
+          <div className="flex items-center gap-2">
+            <span className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400 font-medium">
+              <CheckCircle className="h-4 w-4" />
+              Completed
+            </span>
+            <Button size="sm" asChild>
+              <Link href={`/learn/${courseId}/${nextLessonId}`}>
+                Next Lesson <ChevronRight className="ml-1 h-4 w-4" />
+              </Link>
+            </Button>
+          </div>
+        ) : completed ? (
+          // Video done, no next lesson
+          <span className="flex items-center gap-1.5 text-sm text-green-600 dark:text-green-400 font-medium">
             <CheckCircle className="h-4 w-4" />
-          ) : (
-            <Circle className="h-4 w-4" />
-          )}
-          {completed ? "Completed" : "Mark Complete"}
-        </Button>
-
-        {completed && nextLessonId && (
-          <Button size="sm" asChild>
-            <Link href={`/learn/${courseId}/${nextLessonId}`}>
-              Next <ChevronRight className="ml-1 h-4 w-4" />
-            </Link>
+            Lesson Completed
+          </span>
+        ) : (
+          // Not completed yet
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => markComplete(true)}
+            disabled={loading}
+            className="gap-2"
+          >
+            {loading ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <Circle className="h-4 w-4" />
+            )}
+            Mark as Complete
           </Button>
         )}
       </div>

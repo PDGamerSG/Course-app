@@ -34,7 +34,8 @@ function getNavItems(role: Role): NavItem[] {
     ]
   }
   return [
-    { href: "/student", label: "My Learning", icon: GraduationCap },
+    { href: "/student", label: "My Courses", icon: GraduationCap },
+    { href: "/courses", label: "Browse Courses", icon: BookOpen },
   ]
 }
 
