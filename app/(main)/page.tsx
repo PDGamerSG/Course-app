@@ -1,9 +1,10 @@
 import Link from "next/link"
-import { ArrowRight, BookOpen, Users, Star, Zap, Shield, TrendingUp, Globe, CheckCircle, GraduationCap, FlaskConical } from "lucide-react"
+import { ArrowRight, BookOpen, Users, Star, Zap, Shield, TrendingUp, Globe, CheckCircle, GraduationCap, FlaskConical, LayoutDashboard } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import CourseCard from "@/components/shared/CourseCard"
 import { db } from "@/lib/db"
+import { auth } from "@/lib/auth"
 
 export const dynamic = "force-dynamic"
 
@@ -47,9 +48,13 @@ const DIPLOMA_SUBJECTS = [
 ]
 
 export default async function HomePage() {
-  const allCourses = await getProgramData()
+  const [allCourses, session] = await Promise.all([getProgramData(), auth()])
   const foundationCourses = allCourses.filter((c) => c.level === "FOUNDATION").slice(0, 4)
   const diplomaCourses = allCourses.filter((c) => c.level === "DIPLOMA").slice(0, 4)
+
+  const dashboardHref =
+    session?.user?.role === "ADMIN" ? "/admin" :
+    session?.user?.role === "TEACHER" ? "/teacher" : "/student"
 
   const stats = [
     { label: "Active Students", value: "10,000+", icon: Users },
@@ -121,7 +126,14 @@ export default async function HomePage() {
               size="lg" variant="outline" asChild
               className="text-base px-8 border-white/20 text-white bg-white/5 hover:bg-white/10 hover:text-white"
             >
-              <Link href="/register">Create Free Account</Link>
+              {session?.user ? (
+                <Link href={dashboardHref}>
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Go to Dashboard
+                </Link>
+              ) : (
+                <Link href="/register">Create Free Account</Link>
+              )}
             </Button>
           </div>
           <div className="flex flex-wrap items-center justify-center gap-6 mt-14 text-sm text-white/50">
@@ -404,7 +416,14 @@ export default async function HomePage() {
               </Link>
             </Button>
             <Button size="lg" variant="outline" asChild className="text-base px-8 border-white/20 text-white bg-white/5 hover:bg-white/10 hover:text-white">
-              <Link href="/register">Create Free Account</Link>
+              {session?.user ? (
+                <Link href={dashboardHref}>
+                  <LayoutDashboard className="mr-2 h-4 w-4" />
+                  Go to Dashboard
+                </Link>
+              ) : (
+                <Link href="/register">Create Free Account</Link>
+              )}
             </Button>
           </div>
         </div>
