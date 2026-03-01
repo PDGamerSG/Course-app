@@ -45,10 +45,12 @@ export default async function CourseDetailPage({
 
   if (!course) return notFound()
 
-  const totalLessons = course.modules.reduce((sum: number, m: CourseModule) => sum + m.lessons.length, 0)
-  const totalDuration = course.modules
-    .flatMap((m: CourseModule) => m.lessons)
-    .reduce((sum: number, l: CourseLesson) => {
+  const modules = course.modules as CourseModule[]
+
+  const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0)
+  const totalDuration = modules
+    .flatMap((m) => m.lessons)
+    .reduce((sum, l) => {
       if (!l.duration) return sum
       const parts = l.duration.split(":").map(Number)
       return sum + (parts[0] * 60 + (parts[1] || 0))
@@ -174,10 +176,10 @@ export default async function CourseDetailPage({
             <div>
               <h2 className="text-xl font-black mb-2">Course Curriculum</h2>
               <p className="text-sm text-muted-foreground mb-5">
-                {course.modules.length} sections • {totalLessons} lessons
+                {modules.length} sections • {totalLessons} lessons
               </p>
-              <Accordion type="multiple" defaultValue={[course.modules[0]?.id]} className="space-y-2">
-                {course.modules.map((module: CourseModule, idx) => (
+              <Accordion type="multiple" defaultValue={[modules[0]?.id]} className="space-y-2">
+                {modules.map((module, idx) => (
                   <AccordionItem
                     key={module.id}
                     value={module.id}

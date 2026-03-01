@@ -8,6 +8,9 @@ import LessonList from "@/components/shared/LessonList"
 import { Button } from "@/components/ui/button"
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 
+type LessonItem = { id: string; title: string; duration: string | null; isFree: boolean; order: number }
+type ModuleItem = { id: string; title: string; order: number; lessons: LessonItem[] }
+
 export default async function LearnPage({
   params,
 }: {
@@ -80,7 +83,7 @@ export default async function LearnPage({
   }
 
   // Find prev/next lessons
-  const allLessons = course.modules.flatMap((m: { lessons: { id: string; title: string; duration: string | null; isFree: boolean; order: number }[] }) => m.lessons)
+  const allLessons = (course.modules as ModuleItem[]).flatMap((m) => m.lessons)
   const currentIndex = allLessons.findIndex((l) => l.id === params.lessonId)
   const prevLesson = currentIndex > 0 ? allLessons[currentIndex - 1] : null
   const nextLesson = currentIndex < allLessons.length - 1 ? allLessons[currentIndex + 1] : null

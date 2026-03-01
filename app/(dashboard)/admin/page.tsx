@@ -34,7 +34,7 @@ export default async function AdminDashboard() {
   const diplomaCourses = allCourses.filter((c) => c.level === "DIPLOMA")
 
   const CourseRow = ({ course, showLevel = false }: { course: typeof allCourses[0]; showLevel?: boolean }) => {
-    const lessonCount = course.modules.reduce((sum: number, m: { lessons: { id: string }[] }) => sum + m.lessons.length, 0)
+    const lessonCount = (course.modules as { lessons: { id: string }[] }[]).reduce((sum, m) => sum + m.lessons.length, 0)
     return (
       <div className="border border-border/50 rounded-xl p-4 flex gap-4 hover:border-primary/30 transition-colors bg-card">
         <div className="relative w-20 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
