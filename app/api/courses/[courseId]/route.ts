@@ -9,6 +9,8 @@ const updateCourseSchema = z.object({
   description: z.string().min(1).optional(),
   price: z.number().min(0).optional(),
   thumbnail: z.string().optional(),
+  level: z.enum(["FOUNDATION", "DIPLOMA"]).optional(),
+  subject: z.string().optional(),
   isPublished: z.boolean().optional(),
   isApproved: z.boolean().optional(),
 })

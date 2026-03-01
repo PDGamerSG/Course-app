@@ -1,25 +1,26 @@
 import { redirect } from "next/navigation"
+import Link from "next/link"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
 import AdminCourseActions from "@/components/dashboard/AdminCourseActions"
 import AdminUserActions from "@/components/dashboard/AdminUserActions"
 import Image from "next/image"
-import { BookOpen } from "lucide-react"
+import { BookOpen, GraduationCap, Plus, Pencil } from "lucide-react"
 
 export default async function AdminDashboard() {
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") redirect("/student")
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let pendingCourses: any[] = []
+  let allCourses: any[] = []
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let allUsers: any[] = []
   try {
-    [pendingCourses, allUsers] = await Promise.all([
+    [allCourses, allUsers] = await Promise.all([
       db.course.findMany({
-        where: { isPublished: true },
         include: {
           teacher: { select: { id: true, name: true, email: true, image: true } },
           modules: { include: { lessons: { select: { id: true } } } },
@@ -39,80 +40,145 @@ export default async function AdminDashboard() {
     // DB not connected yet
   }
 
+  const publishedCourses = allCourses.filter((c) => c.isPublished)
+  const draftCourses = allCourses.filter((c) => !c.isPublished)
+  const foundationCourses = allCourses.filter((c) => c.level === "FOUNDATION")
+  const diplomaCourses = allCourses.filter((c) => c.level === "DIPLOMA")
+
+  const CourseRow = ({ course }: { course: typeof allCourses[0] }) => {
+    const lessonCount = course.modules.reduce((sum: number, m: { lessons: { id: string }[] }) => sum + m.lessons.length, 0)
+    return (
+      <div className="border border-border/50 rounded-lg p-4 flex gap-4">
+        <div className="relative w-20 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
+          {course.thumbnail ? (
+            <Image src={course.thumbnail} alt={course.title} fill className="object-cover" />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <BookOpen className="h-5 w-5 text-muted-foreground/30" />
+            </div>
+          )}
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            <h3 className="font-semibold text-sm">{course.title}</h3>
+            {course.subject && <span className="text-xs text-primary font-medium">{course.subject}</span>}
+            <Badge variant={course.isPublished ? "default" : "outline"} className="text-[10px] h-4 px-1.5">
+              {course.isPublished ? "Published" : "Draft"}
+            </Badge>
+            <Badge variant="secondary" className={`text-[10px] h-4 px-1.5 ${course.level === "DIPLOMA" ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}>
+              {course.level === "DIPLOMA" ? "Diploma" : "Foundation"}
+            </Badge>
+          </div>
+          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+            <span>{lessonCount} lessons</span>
+            <span>{course._count.enrollments} students</span>
+            <span className="font-medium text-foreground">{course.price === 0 ? "Free" : `₹${course.price}`}</span>
+          </div>
+        </div>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <Button size="sm" variant="outline" asChild>
+            <Link href={`/teacher/courses/${course.id}/edit`}>
+              <Pencil className="h-3 w-3 mr-1" />
+              Edit
+            </Link>
+          </Button>
+          <AdminCourseActions
+            courseId={course.id}
+            teacherEmail={course.teacher.email}
+            teacherName={course.teacher.name || "Teacher"}
+            courseTitle={course.title}
+          />
+        </div>
+      </div>
+    )
+  }
+
   return (
     <div className="p-6 max-w-6xl mx-auto">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold">Admin Dashboard</h1>
-        <p className="text-muted-foreground mt-1">Manage courses and users</p>
+      <div className="flex items-center justify-between mb-8">
+        <div>
+          <h1 className="text-3xl font-bold">Admin Dashboard</h1>
+          <p className="text-muted-foreground mt-1">Manage courses and users</p>
+        </div>
+        <Button asChild>
+          <Link href="/teacher/courses/new">
+            <Plus className="mr-2 h-4 w-4" />
+            Create Course
+          </Link>
+        </Button>
       </div>
 
-      <div className="grid grid-cols-3 gap-4 mb-8">
+      {/* Stats */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         <div className="border border-border/50 rounded-lg p-4">
-          <div className="text-2xl font-bold text-primary">{pendingCourses.length}</div>
-          <div className="text-sm text-muted-foreground">Published Courses</div>
+          <div className="text-2xl font-bold text-green-600">{publishedCourses.length}</div>
+          <div className="text-sm text-muted-foreground">Published</div>
         </div>
         <div className="border border-border/50 rounded-lg p-4">
-          <div className="text-2xl font-bold">{allUsers.length}</div>
-          <div className="text-sm text-muted-foreground">Total Users</div>
+          <div className="text-2xl font-bold text-amber-600">{draftCourses.length}</div>
+          <div className="text-sm text-muted-foreground">Drafts</div>
         </div>
-        <div className="border border-border/50 rounded-lg p-4">
-          <div className="text-2xl font-bold">{allUsers.filter((u) => u.role === "TEACHER").length}</div>
-          <div className="text-sm text-muted-foreground">Teachers</div>
+        <div className="border border-border/50 rounded-lg p-4 flex items-center gap-3">
+          <BookOpen className="h-5 w-5 text-blue-500" />
+          <div>
+            <div className="text-2xl font-bold text-blue-600">{foundationCourses.length}</div>
+            <div className="text-sm text-muted-foreground">Foundation</div>
+          </div>
+        </div>
+        <div className="border border-border/50 rounded-lg p-4 flex items-center gap-3">
+          <GraduationCap className="h-5 w-5 text-indigo-500" />
+          <div>
+            <div className="text-2xl font-bold text-indigo-600">{diplomaCourses.length}</div>
+            <div className="text-sm text-muted-foreground">Diploma</div>
+          </div>
         </div>
       </div>
 
-      <Tabs defaultValue="courses">
+      <Tabs defaultValue="foundation">
         <TabsList className="mb-6">
-          <TabsTrigger value="courses">
-            Published Courses
-            <Badge variant="secondary" className="ml-2 h-5 px-1.5 text-xs">
-              {pendingCourses.length}
-            </Badge>
+          <TabsTrigger value="foundation" className="flex items-center gap-1.5">
+            <BookOpen className="h-3.5 w-3.5" />
+            Foundation
+            <Badge variant="secondary" className="ml-1 h-4 px-1.5 text-xs">{foundationCourses.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="diploma" className="flex items-center gap-1.5">
+            <GraduationCap className="h-3.5 w-3.5" />
+            Diploma
+            <Badge variant="secondary" className="ml-1 h-4 px-1.5 text-xs">{diplomaCourses.length}</Badge>
+          </TabsTrigger>
+          <TabsTrigger value="all">
+            All Courses
+            <Badge variant="secondary" className="ml-1 h-4 px-1.5 text-xs">{allCourses.length}</Badge>
           </TabsTrigger>
           <TabsTrigger value="users">Users</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="courses">
-          {pendingCourses.length === 0 ? (
-            <div className="text-center py-16 text-muted-foreground border border-dashed border-border/50 rounded-xl">
-              <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-30" />
-              <p>No published courses yet</p>
-            </div>
+        <TabsContent value="foundation">
+          {foundationCourses.length === 0 ? (
+            <EmptyState label="No Foundation courses yet" href="/teacher/courses/new" />
           ) : (
-            <div className="space-y-4">
-              {pendingCourses.map((course) => {
-                const lessonCount = course.modules.reduce((sum: number, m: { lessons: { id: string }[] }) => sum + m.lessons.length, 0)
-                return (
-                  <div key={course.id} className="border border-border/50 rounded-lg p-4 flex gap-4">
-                    <div className="relative w-24 h-16 rounded-lg overflow-hidden bg-muted flex-shrink-0">
-                      {course.thumbnail ? (
-                        <Image src={course.thumbnail} alt={course.title} fill className="object-cover" />
-                      ) : (
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <BookOpen className="h-6 w-6 text-muted-foreground/30" />
-                        </div>
-                      )}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold">{course.title}</h3>
-                      <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">{course.description}</p>
-                      <div className="flex items-center gap-4 mt-2 text-xs text-muted-foreground">
-                        <span>by {course.teacher.name}</span>
-                        <span>{lessonCount} lessons</span>
-                        <span className="font-medium text-foreground">
-                          {course.price === 0 ? "Free" : `₹${course.price}`}
-                        </span>
-                      </div>
-                    </div>
-                    <AdminCourseActions
-                      courseId={course.id}
-                      teacherEmail={course.teacher.email}
-                      teacherName={course.teacher.name || "Teacher"}
-                      courseTitle={course.title}
-                    />
-                  </div>
-                )
-              })}
+            <div className="space-y-3">
+              {foundationCourses.map((course) => <CourseRow key={course.id} course={course} />)}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="diploma">
+          {diplomaCourses.length === 0 ? (
+            <EmptyState label="No Diploma courses yet" href="/teacher/courses/new" />
+          ) : (
+            <div className="space-y-3">
+              {diplomaCourses.map((course) => <CourseRow key={course.id} course={course} />)}
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="all">
+          {allCourses.length === 0 ? (
+            <EmptyState label="No courses yet" href="/teacher/courses/new" />
+          ) : (
+            <div className="space-y-3">
+              {allCourses.map((course) => <CourseRow key={course.id} course={course} />)}
             </div>
           )}
         </TabsContent>
@@ -125,7 +191,7 @@ export default async function AdminDashboard() {
                   <th className="text-left p-3 text-sm font-medium text-muted-foreground">User</th>
                   <th className="text-left p-3 text-sm font-medium text-muted-foreground">Email</th>
                   <th className="text-left p-3 text-sm font-medium text-muted-foreground">Role</th>
-                  <th className="text-left p-3 text-sm font-medium text-muted-foreground">Courses</th>
+                  <th className="text-left p-3 text-sm font-medium text-muted-foreground">Enrollments</th>
                   <th className="text-left p-3 text-sm font-medium text-muted-foreground">Actions</th>
                 </tr>
               </thead>
@@ -166,6 +232,18 @@ export default async function AdminDashboard() {
           </div>
         </TabsContent>
       </Tabs>
+    </div>
+  )
+}
+
+function EmptyState({ label, href }: { label: string; href: string }) {
+  return (
+    <div className="text-center py-16 text-muted-foreground border border-dashed border-border/50 rounded-xl">
+      <BookOpen className="h-10 w-10 mx-auto mb-3 opacity-30" />
+      <p className="mb-4">{label}</p>
+      <Button asChild size="sm">
+        <Link href={href}><Plus className="mr-2 h-3.5 w-3.5" />Create Course</Link>
+      </Button>
     </div>
   )
 }

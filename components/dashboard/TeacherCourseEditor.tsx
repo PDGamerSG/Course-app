@@ -70,6 +70,8 @@ interface Course {
   description: string
   thumbnail: string | null
   price: number
+  level: "FOUNDATION" | "DIPLOMA"
+  subject: string | null
   isPublished: boolean
   isApproved: boolean
   modules: Module[]
@@ -88,6 +90,8 @@ export default function TeacherCourseEditor({ course }: Props) {
   const [description, setDescription] = useState(course.description)
   const [price, setPrice] = useState(course.price)
   const [thumbnail, setThumbnail] = useState(course.thumbnail || "")
+  const [level, setLevel] = useState<"FOUNDATION" | "DIPLOMA">(course.level)
+  const [subject, setSubject] = useState(course.subject || "")
   const [savingDetails, setSavingDetails] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -111,6 +115,8 @@ export default function TeacherCourseEditor({ course }: Props) {
         description,
         price: Number(price),
         thumbnail: normalizedThumbnail || undefined,
+        level,
+        subject: subject || undefined,
       })
       if (normalizedThumbnail !== thumbnail) setThumbnail(normalizedThumbnail)
       toast({ title: "Details saved!" })
@@ -459,6 +465,30 @@ export default function TeacherCourseEditor({ course }: Props) {
                   placeholder="Describe what students will learn..."
                   className="resize-none"
                 />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium">Program Level</Label>
+                  <select
+                    value={level}
+                    onChange={(e) => setLevel(e.target.value as "FOUNDATION" | "DIPLOMA")}
+                    className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                  >
+                    <option value="FOUNDATION">Foundation</option>
+                    <option value="DIPLOMA">Diploma</option>
+                  </select>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-sm font-medium">Subject / Course Code</Label>
+                  <Input
+                    value={subject}
+                    onChange={(e) => setSubject(e.target.value)}
+                    placeholder="e.g. Mathematics I, ML Foundations"
+                  />
+                  <p className="text-xs text-muted-foreground">Shown on the course card</p>
+                </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

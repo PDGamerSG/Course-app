@@ -9,6 +9,8 @@ const createCourseSchema = z.object({
   description: z.string().min(1, "Description is required"),
   price: z.number().min(0, "Price must be non-negative"),
   thumbnail: z.string().optional(),
+  level: z.enum(["FOUNDATION", "DIPLOMA"]).optional(),
+  subject: z.string().optional(),
 })
 
 export async function GET(request: NextRequest) {
@@ -76,7 +78,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 })
     }
 
-    const { title, description, price, thumbnail } = parsed.data
+    const { title, description, price, thumbnail, level, subject } = parsed.data
 
     const course = await db.course.create({
       data: {
@@ -84,6 +86,8 @@ export async function POST(request: NextRequest) {
         description,
         price,
         thumbnail,
+        level: level ?? "FOUNDATION",
+        subject,
         teacherId: session.user.id as string,
       },
     })

@@ -1,6 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Users, BookOpen, Clock, PlayCircle } from "lucide-react"
+import { Users, BookOpen, PlayCircle } from "lucide-react"
 import { Badge } from "@/components/ui/badge"
 
 interface CourseCardProps {
@@ -15,6 +15,8 @@ interface CourseCardProps {
   }
   lessonCount: number
   enrollmentCount?: number
+  subject?: string
+  level?: "FOUNDATION" | "DIPLOMA"
 }
 
 export default function CourseCard({
@@ -26,6 +28,8 @@ export default function CourseCard({
   teacher,
   lessonCount,
   enrollmentCount = 0,
+  subject,
+  level,
 }: CourseCardProps) {
   return (
     <Link href={`/courses/${id}`} className="group block">
@@ -66,11 +70,27 @@ export default function CourseCard({
               </Badge>
             )}
           </div>
+
+          {/* Level badge top-right */}
+          {level && (
+            <div className="absolute top-2.5 right-2.5">
+              <Badge className={`text-[10px] font-semibold shadow ${
+                level === "FOUNDATION"
+                  ? "bg-blue-600/80 hover:bg-blue-600/80 text-white"
+                  : "bg-indigo-600/80 hover:bg-indigo-600/80 text-white"
+              }`}>
+                {level === "FOUNDATION" ? "Foundation" : "Diploma"}
+              </Badge>
+            </div>
+          )}
         </div>
 
         {/* Body */}
         <div className="p-4 flex flex-col flex-1 gap-3">
           <div className="flex-1">
+            {subject && (
+              <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-1">{subject}</p>
+            )}
             <h3 className="font-bold text-sm leading-snug line-clamp-2 group-hover:text-primary transition-colors mb-1.5">
               {title}
             </h3>
@@ -108,10 +128,6 @@ export default function CourseCard({
             <span className="flex items-center gap-1">
               <Users className="h-3 w-3" />
               {enrollmentCount.toLocaleString()} students
-            </span>
-            <span className="flex items-center gap-1 ml-auto">
-              <Clock className="h-3 w-3" />
-              Lifetime access
             </span>
           </div>
         </div>

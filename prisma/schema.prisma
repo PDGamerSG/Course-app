@@ -12,6 +12,11 @@ enum Role {
   ADMIN
 }
 
+enum CourseLevel {
+  FOUNDATION
+  DIPLOMA
+}
+
 model User {
   id            String       @id @default(cuid())
   name          String?
@@ -35,6 +40,8 @@ model Course {
   description String
   thumbnail   String?
   price       Float
+  level       CourseLevel  @default(FOUNDATION)
+  subject     String?
   isPublished Boolean      @default(false)
   isApproved  Boolean      @default(false)
   teacherId   String
