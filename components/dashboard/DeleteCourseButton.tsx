@@ -26,10 +26,12 @@ export default function DeleteCourseButton({ courseId, courseTitle }: Props) {
     setDeleting(true)
     try {
       await axios.delete(`/api/courses/${courseId}`)
-      toast({ title: "Course deleted" })
+      toast({ title: "Course deleted successfully" })
+      router.push("/admin")
       router.refresh()
-    } catch {
-      toast({ title: "Error", description: "Failed to delete course.", variant: "destructive" })
+    } catch (err) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.error : undefined
+      toast({ title: "Error", description: msg || "Failed to delete course.", variant: "destructive" })
       setDeleting(false)
     }
   }
