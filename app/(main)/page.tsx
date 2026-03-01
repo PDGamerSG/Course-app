@@ -59,7 +59,7 @@ export default async function HomePage() {
     <div className="flex flex-col">
 
       {/* ── HERO ── */}
-      <section className="relative overflow-hidden bg-[#060B1F]">
+      <section className="relative overflow-hidden bg-[#060B1F] -mt-[76px] pt-[76px]">
         {/* Grid pattern */}
         <div
           className="absolute inset-0 opacity-[0.06]"

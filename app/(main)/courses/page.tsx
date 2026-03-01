@@ -54,7 +54,7 @@ export default async function CoursesPage({
   return (
     <div>
       {/* ── Page header ── */}
-      <div className="relative overflow-hidden bg-[#060B1F] text-white">
+      <div className="relative overflow-hidden bg-[#060B1F] text-white -mt-[76px] pt-[76px]">
         <div
           className="absolute inset-0 opacity-[0.05]"
           style={{ backgroundImage: "linear-gradient(#6366f1 1px,transparent 1px),linear-gradient(90deg,#6366f1 1px,transparent 1px)", backgroundSize: "60px 60px" }}

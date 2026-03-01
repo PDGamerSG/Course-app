@@ -94,7 +94,7 @@ export default function NewCoursePage() {
   }
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-6 max-w-6xl mx-auto">
       {/* Header */}
       <div className="mb-6">
         <Button variant="ghost" size="sm" asChild className="mb-4 -ml-2">
@@ -107,195 +107,243 @@ export default function NewCoursePage() {
         <p className="text-muted-foreground mt-1">Fill in the details below to set up your course</p>
       </div>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-        {/* Program Level */}
-        <Card className="border-border/50">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base">Program Level</CardTitle>
-            <CardDescription>Choose the program this course belongs to</CardDescription>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-3">
-              {(["FOUNDATION", "DIPLOMA"] as const).map((lvl) => (
-                <button
-                  key={lvl}
-                  type="button"
-                  onClick={() => {
-                    setSelectedLevel(lvl)
-                    setValue("level", lvl)
-                    setValue("subject", "")
-                    setIsCustomSubject(false)
-                  }}
-                  className={`flex items-center gap-3 p-4 rounded-lg border-2 text-left transition-all ${
-                    selectedLevel === lvl
-                      ? "border-primary bg-primary/5"
-                      : "border-border hover:border-primary/40"
-                  }`}
-                >
-                  {lvl === "FOUNDATION"
-                    ? <BookOpen className="h-5 w-5 text-blue-500 shrink-0" />
-                    : <GraduationCap className="h-5 w-5 text-indigo-500 shrink-0" />
-                  }
-                  <div>
-                    <div className="font-medium text-sm">{lvl === "FOUNDATION" ? "Foundation" : "Diploma"}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {lvl === "FOUNDATION" ? "Level 1–2 core courses" : "Level 3–5 specialization"}
-                    </div>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
+      <form onSubmit={handleSubmit(onSubmit)}>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Course Details */}
-        <Card className="border-border/50">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base">Course Details</CardTitle>
-            <CardDescription>Basic information about the course</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            {/* Subject */}
-            <div className="space-y-2">
-              <Label htmlFor="subject">Subject <span className="text-destructive">*</span></Label>
-              <Select
-                disabled={loading}
-                onValueChange={(val) => {
-                  if (val === "__custom__") {
-                    setIsCustomSubject(true)
-                    setValue("subject", "")
-                  } else {
-                    setIsCustomSubject(false)
-                    setValue("subject", val)
-                  }
-                }}
-              >
-                <SelectTrigger id="subject">
-                  <SelectValue placeholder="Select a subject…" />
-                </SelectTrigger>
-                <SelectContent>
-                  {subjects.map((s) => (
-                    <SelectItem key={s} value={s}>{s}</SelectItem>
+          {/* ── Left column: form ── */}
+          <div className="lg:col-span-2 space-y-6">
+
+            {/* Program Level */}
+            <Card className="border-border/50">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base">Program Level</CardTitle>
+                <CardDescription>Choose the program this course belongs to</CardDescription>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-2 gap-3">
+                  {(["FOUNDATION", "DIPLOMA"] as const).map((lvl) => (
+                    <button
+                      key={lvl}
+                      type="button"
+                      onClick={() => {
+                        setSelectedLevel(lvl)
+                        setValue("level", lvl)
+                        setValue("subject", "")
+                        setIsCustomSubject(false)
+                      }}
+                      className={`flex items-center gap-3 p-4 rounded-lg border-2 text-left transition-all ${
+                        selectedLevel === lvl
+                          ? "border-primary bg-primary/5"
+                          : "border-border hover:border-primary/40"
+                      }`}
+                    >
+                      {lvl === "FOUNDATION"
+                        ? <BookOpen className="h-5 w-5 text-blue-500 shrink-0" />
+                        : <GraduationCap className="h-5 w-5 text-indigo-500 shrink-0" />
+                      }
+                      <div>
+                        <div className="font-medium text-sm">{lvl === "FOUNDATION" ? "Foundation" : "Diploma"}</div>
+                        <div className="text-xs text-muted-foreground">
+                          {lvl === "FOUNDATION" ? "Level 1–2 core courses" : "Level 3–5 specialization"}
+                        </div>
+                      </div>
+                    </button>
                   ))}
-                  <SelectItem value="__custom__">Other (type below)</SelectItem>
-                </SelectContent>
-              </Select>
-              {isCustomSubject && (
-                <Input
-                  placeholder="Enter subject name…"
-                  autoFocus
-                  onChange={(e) => setValue("subject", e.target.value)}
-                  disabled={loading}
-                />
-              )}
-              {errors.subject && <p className="text-xs text-destructive">{errors.subject.message}</p>}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Course Details */}
+            <Card className="border-border/50">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base">Course Details</CardTitle>
+                <CardDescription>Basic information about the course</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                {/* Subject */}
+                <div className="space-y-2">
+                  <Label htmlFor="subject">Subject <span className="text-destructive">*</span></Label>
+                  <Select
+                    disabled={loading}
+                    onValueChange={(val) => {
+                      if (val === "__custom__") {
+                        setIsCustomSubject(true)
+                        setValue("subject", "")
+                      } else {
+                        setIsCustomSubject(false)
+                        setValue("subject", val)
+                      }
+                    }}
+                  >
+                    <SelectTrigger id="subject">
+                      <SelectValue placeholder="Select a subject…" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {subjects.map((s) => (
+                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                      ))}
+                      <SelectItem value="__custom__">Other (type below)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {isCustomSubject && (
+                    <Input
+                      placeholder="Enter subject name…"
+                      autoFocus
+                      onChange={(e) => setValue("subject", e.target.value)}
+                      disabled={loading}
+                    />
+                  )}
+                  {errors.subject && <p className="text-xs text-destructive">{errors.subject.message}</p>}
+                </div>
+
+                <Separator />
+
+                {/* Title */}
+                <div className="space-y-2">
+                  <Label htmlFor="title">Course Title <span className="text-destructive">*</span></Label>
+                  <Input
+                    id="title"
+                    placeholder="e.g. Mathematics I — Foundations of Calculus"
+                    {...register("title")}
+                    disabled={loading}
+                  />
+                  {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
+                </div>
+
+                {/* Description */}
+                <div className="space-y-2">
+                  <Label htmlFor="description">Description <span className="text-destructive">*</span></Label>
+                  <Textarea
+                    id="description"
+                    placeholder="Describe what students will learn…"
+                    rows={5}
+                    {...register("description")}
+                    disabled={loading}
+                  />
+                  {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Instructor & Pricing */}
+            <Card className="border-border/50">
+              <CardHeader className="pb-4">
+                <CardTitle className="text-base">Instructor &amp; Pricing</CardTitle>
+                <CardDescription>Optional details shown on the course listing</CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-5">
+                {/* Instructor */}
+                <div className="space-y-2">
+                  <Label htmlFor="instructorName" className="flex items-center gap-1.5">
+                    <User className="h-3.5 w-3.5 text-muted-foreground" />
+                    Instructor Name
+                    <span className="text-muted-foreground font-normal">(optional)</span>
+                  </Label>
+                  <Input
+                    id="instructorName"
+                    placeholder="e.g. Prof. Andrew Ng, Dr. Anand Rajaraman"
+                    {...register("instructorName")}
+                    disabled={loading}
+                  />
+                  <p className="text-xs text-muted-foreground">Shown as the professor&apos;s name on the course card</p>
+                </div>
+
+                <Separator />
+
+                {/* Price */}
+                <div className="space-y-2">
+                  <Label htmlFor="price" className="flex items-center gap-1.5">
+                    <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
+                    Price (₹)
+                  </Label>
+                  <Input
+                    id="price"
+                    type="number"
+                    min="0"
+                    step="1"
+                    placeholder="0"
+                    className="max-w-[180px]"
+                    {...register("price", { valueAsNumber: true })}
+                    disabled={loading}
+                  />
+                  {errors.price && <p className="text-xs text-destructive">{errors.price.message}</p>}
+                  <p className="text-xs text-muted-foreground">Set to 0 to make the course free</p>
+                </div>
+
+                <Separator />
+
+                {/* Thumbnail */}
+                <div className="space-y-2">
+                  <Label htmlFor="thumbnail" className="flex items-center gap-1.5">
+                    <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                    Thumbnail URL
+                    <span className="text-muted-foreground font-normal">(optional)</span>
+                  </Label>
+                  <Input
+                    id="thumbnail"
+                    type="url"
+                    placeholder="https://drive.google.com/file/d/…"
+                    {...register("thumbnail")}
+                    disabled={loading}
+                  />
+                  {errors.thumbnail && <p className="text-xs text-destructive">{errors.thumbnail.message}</p>}
+                  <p className="text-xs text-muted-foreground">Paste a direct image URL for the course cover</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Actions */}
+            <div className="flex gap-3 pb-6">
+              <Button type="submit" disabled={loading} size="lg">
+                {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Create Course &amp; Add Content
+              </Button>
+              <Button variant="outline" size="lg" asChild>
+                <Link href="/admin">Cancel</Link>
+              </Button>
             </div>
+          </div>
 
-            <Separator />
+          {/* ── Right column: tips ── */}
+          <div className="space-y-4">
+            <Card className="border-border/50 sticky top-6">
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm">Quick Tips</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4 text-sm text-muted-foreground">
+                <div className="flex gap-3">
+                  <div className="mt-0.5 w-5 h-5 rounded-full bg-blue-500/10 flex items-center justify-center shrink-0">
+                    <BookOpen className="h-3 w-3 text-blue-500" />
+                  </div>
+                  <p>Choose <strong className="text-foreground">Foundation</strong> for Level 1–4 core subjects (Math, Stats, English, CS).</p>
+                </div>
+                <div className="flex gap-3">
+                  <div className="mt-0.5 w-5 h-5 rounded-full bg-indigo-500/10 flex items-center justify-center shrink-0">
+                    <GraduationCap className="h-3 w-3 text-indigo-500" />
+                  </div>
+                  <p>Choose <strong className="text-foreground">Diploma</strong> for Level 5–8 specializations (ML, DS, Python, etc.).</p>
+                </div>
+                <Separator />
+                <div className="flex gap-3">
+                  <div className="mt-0.5 w-5 h-5 rounded-full bg-emerald-500/10 flex items-center justify-center shrink-0">
+                    <ImageIcon className="h-3 w-3 text-emerald-500" />
+                  </div>
+                  <p>After creating, you can add <strong className="text-foreground">modules &amp; lessons</strong> on the next screen.</p>
+                </div>
+                <div className="flex gap-3">
+                  <div className="mt-0.5 w-5 h-5 rounded-full bg-amber-500/10 flex items-center justify-center shrink-0">
+                    <DollarSign className="h-3 w-3 text-amber-500" />
+                  </div>
+                  <p>Set price to <strong className="text-foreground">₹0</strong> to publish as a free course visible to all students.</p>
+                </div>
+                <Separator />
+                <p className="text-xs">
+                  The course will be saved as a <strong className="text-foreground">draft</strong> and won&apos;t be visible to students until you publish it.
+                </p>
+              </CardContent>
+            </Card>
+          </div>
 
-            {/* Title */}
-            <div className="space-y-2">
-              <Label htmlFor="title">Course Title <span className="text-destructive">*</span></Label>
-              <Input
-                id="title"
-                placeholder="e.g. Mathematics I — Foundations of Calculus"
-                {...register("title")}
-                disabled={loading}
-              />
-              {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
-            </div>
-
-            {/* Description */}
-            <div className="space-y-2">
-              <Label htmlFor="description">Description <span className="text-destructive">*</span></Label>
-              <Textarea
-                id="description"
-                placeholder="Describe what students will learn…"
-                rows={4}
-                {...register("description")}
-                disabled={loading}
-              />
-              {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Instructor & Pricing */}
-        <Card className="border-border/50">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-base">Instructor &amp; Pricing</CardTitle>
-            <CardDescription>Optional details shown on the course listing</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-5">
-            {/* Instructor */}
-            <div className="space-y-2">
-              <Label htmlFor="instructorName" className="flex items-center gap-1.5">
-                <User className="h-3.5 w-3.5 text-muted-foreground" />
-                Instructor Name
-                <span className="text-muted-foreground font-normal">(optional)</span>
-              </Label>
-              <Input
-                id="instructorName"
-                placeholder="e.g. Prof. Andrew Ng, Dr. Anand Rajaraman"
-                {...register("instructorName")}
-                disabled={loading}
-              />
-              <p className="text-xs text-muted-foreground">Shown as the professor&apos;s name on the course card</p>
-            </div>
-
-            <Separator />
-
-            {/* Price */}
-            <div className="space-y-2">
-              <Label htmlFor="price" className="flex items-center gap-1.5">
-                <DollarSign className="h-3.5 w-3.5 text-muted-foreground" />
-                Price (₹)
-              </Label>
-              <Input
-                id="price"
-                type="number"
-                min="0"
-                step="1"
-                placeholder="0"
-                className="max-w-[180px]"
-                {...register("price", { valueAsNumber: true })}
-                disabled={loading}
-              />
-              {errors.price && <p className="text-xs text-destructive">{errors.price.message}</p>}
-              <p className="text-xs text-muted-foreground">Set to 0 to make the course free</p>
-            </div>
-
-            <Separator />
-
-            {/* Thumbnail */}
-            <div className="space-y-2">
-              <Label htmlFor="thumbnail" className="flex items-center gap-1.5">
-                <ImageIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                Thumbnail URL
-                <span className="text-muted-foreground font-normal">(optional)</span>
-              </Label>
-              <Input
-                id="thumbnail"
-                type="url"
-                placeholder="https://drive.google.com/file/d/…"
-                {...register("thumbnail")}
-                disabled={loading}
-              />
-              {errors.thumbnail && <p className="text-xs text-destructive">{errors.thumbnail.message}</p>}
-              <p className="text-xs text-muted-foreground">Paste a direct image URL for the course cover</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Actions */}
-        <div className="flex gap-3 pb-6">
-          <Button type="submit" disabled={loading} size="lg">
-            {loading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-            Create Course &amp; Add Content
-          </Button>
-          <Button variant="outline" size="lg" asChild>
-            <Link href="/admin">Cancel</Link>
-          </Button>
         </div>
       </form>
     </div>
