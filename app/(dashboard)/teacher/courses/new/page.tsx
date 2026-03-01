@@ -39,7 +39,7 @@ const DIPLOMA_SUBJECTS = [
 ]
 
 const schema = z.object({
-  title: z.string().min(5, "Title must be at least 5 characters"),
+  title: z.string().min(1, "Title is required"),
   description: z.string().min(1, "Description is required"),
   level: z.enum(["FOUNDATION", "DIPLOMA"]),
   subject: z.string().min(1, "Subject is required"),

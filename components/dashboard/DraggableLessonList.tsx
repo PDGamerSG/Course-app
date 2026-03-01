@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import {
   DndContext,
   closestCenter,
@@ -125,6 +125,11 @@ export default function DraggableLessonList({
 }: Props) {
   const { toast } = useToast()
   const [items, setItems] = useState(lessons)
+
+  // Sync local state when parent updates the lessons list (e.g. after save/add)
+  useEffect(() => {
+    setItems(lessons)
+  }, [lessons])
 
   const sensors = useSensors(
     useSensor(PointerSensor),

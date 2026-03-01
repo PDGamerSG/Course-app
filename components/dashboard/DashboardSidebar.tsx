@@ -71,7 +71,15 @@ export default function DashboardSidebar({ role, userName, userEmail, userImage 
       {/* Nav */}
       <nav className="flex-1 p-3 space-y-1">
         {navItems.map((item) => {
-          const isActive = pathname === item.href || pathname.startsWith(item.href + "/")
+          // Active if exact match, OR path starts with href BUT no other nav item is a more specific match
+          const isActive =
+            pathname === item.href ||
+            (pathname.startsWith(item.href + "/") &&
+              !navItems.some(
+                (other) =>
+                  other.href !== item.href &&
+                  (pathname === other.href || pathname.startsWith(other.href + "/"))
+              ))
           return (
             <Link
               key={item.href}
