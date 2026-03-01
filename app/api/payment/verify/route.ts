@@ -4,6 +4,8 @@ import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { verifyRazorpaySignature } from "@/lib/razorpay"
 
+type TxClient = Parameters<Parameters<typeof db.$transaction>[0]>[0]
+
 const verifySchema = z.object({
   razorpay_payment_id: z.string().min(1),
   razorpay_order_id: z.string().min(1),
@@ -51,7 +53,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Update purchase + create enrollment in a transaction
-    await db.$transaction(async (tx) => {
+    await db.$transaction(async (tx: TxClient) => {
       await tx.purchase.update({
         where: { id: purchase.id },
         data: { status: "success", razorpayPaymentId: razorpay_payment_id },

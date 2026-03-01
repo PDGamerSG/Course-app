@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from "next/server"
 import { db } from "@/lib/db"
 import { verifyWebhookSignature } from "@/lib/razorpay"
 
+type TxClient = Parameters<Parameters<typeof db.$transaction>[0]>[0]
+
 // Disable body parsing so we can read the raw body for signature verification
 export const dynamic = "force-dynamic"
 
@@ -24,7 +26,7 @@ export async function POST(request: NextRequest) {
       const razorpayPaymentId: string = paymentEntity?.id
 
       if (razorpayOrderId && razorpayPaymentId) {
-        await db.$transaction(async (tx) => {
+        await db.$transaction(async (tx: TxClient) => {
           // 1. Find the pending purchase by Razorpay order ID
           const purchase = await tx.purchase.findFirst({
             where: { razorpayOrderId },

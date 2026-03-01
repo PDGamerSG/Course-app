@@ -3,6 +3,8 @@ import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 
+type TxClient = Parameters<Parameters<typeof db.$transaction>[0]>[0]
+
 const simulateSchema = z.object({
   courseId: z.string().min(1),
 })
@@ -46,7 +48,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Record simulated purchase + create enrollment
-    await db.$transaction(async (tx) => {
+    await db.$transaction(async (tx: TxClient) => {
       await tx.purchase.create({
         data: {
           userId,
