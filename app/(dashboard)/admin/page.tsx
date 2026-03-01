@@ -78,7 +78,7 @@ export default async function AdminDashboard() {
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           <Button size="sm" variant="outline" asChild className="h-8 text-xs">
-            <Link href={`/teacher/courses/${course.id}/edit`}>
+            <Link href={`/admin/courses/${course.id}/edit`}>
               <Pencil className="h-3 w-3 mr-1" />
               Edit
             </Link>
@@ -102,7 +102,7 @@ export default async function AdminDashboard() {
           <p className="text-muted-foreground mt-1">Manage courses and users</p>
         </div>
         <Button asChild>
-          <Link href="/teacher/courses/new">
+          <Link href="/admin/courses/new">
             <Plus className="mr-2 h-4 w-4" />
             Create Course
           </Link>
@@ -156,7 +156,7 @@ export default async function AdminDashboard() {
 
         <TabsContent value="foundation">
           {foundationCourses.length === 0 ? (
-            <EmptyState label="No Foundation courses yet" href="/teacher/courses/new" />
+            <EmptyState label="No Foundation courses yet" href="/admin/courses/new" />
           ) : (
             <div className="space-y-3">
               {foundationCourses.map((course) => <CourseRow key={course.id} course={course} />)}
@@ -166,7 +166,7 @@ export default async function AdminDashboard() {
 
         <TabsContent value="diploma">
           {diplomaCourses.length === 0 ? (
-            <EmptyState label="No Diploma courses yet" href="/teacher/courses/new" />
+            <EmptyState label="No Diploma courses yet" href="/admin/courses/new" />
           ) : (
             <div className="space-y-3">
               {diplomaCourses.map((course) => <CourseRow key={course.id} course={course} />)}
@@ -176,7 +176,7 @@ export default async function AdminDashboard() {
 
         <TabsContent value="all">
           {allCourses.length === 0 ? (
-            <EmptyState label="No courses yet" href="/teacher/courses/new" />
+            <EmptyState label="No courses yet" href="/admin/courses/new" />
           ) : (
             <div className="space-y-3">
               {allCourses.map((course) => <CourseRow key={course.id} course={course} showLevel />)}
