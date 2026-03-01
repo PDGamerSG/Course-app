@@ -9,10 +9,10 @@ import {
 } from "lucide-react"
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { cn } from "@/lib/utils"
 import { Role } from "@/types"
+import { ThemeToggle } from "@/components/shared/ThemeToggle"
 
 interface NavItem {
   href: string
@@ -55,17 +55,27 @@ export default function DashboardSidebar({ role, userName, userEmail, userImage 
     <div className="flex flex-col h-full">
       {/* Logo */}
       <div className="p-4 border-b border-border/50">
-        <Link href="/" className="flex items-center gap-2">
-          <BookOpen className="h-6 w-6 text-primary" />
-          <span className="font-bold text-primary text-lg">LearnHub</span>
+        <Link href="/" className="flex items-center gap-2.5 group">
+          <div className="w-8 h-8 rounded-xl bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center shadow-md shadow-blue-500/20">
+            <BookOpen className="h-4 w-4 text-white" />
+          </div>
+          <div className="flex flex-col leading-none">
+            <span className="font-extrabold text-sm">LearnHub</span>
+            <span className="text-[9px] text-muted-foreground font-medium tracking-widest uppercase">IIT Madras</span>
+          </div>
         </Link>
       </div>
 
       {/* Role badge */}
-      <div className="px-4 py-2">
-        <Badge variant="secondary" className="text-xs capitalize">
+      <div className="px-4 py-2.5">
+        <span className={cn(
+          "inline-flex items-center px-2.5 py-1 rounded-lg text-[10px] font-bold uppercase tracking-widest",
+          role === "ADMIN" ? "bg-red-500/10 text-red-600 dark:text-red-400" :
+          role === "TEACHER" ? "bg-blue-500/10 text-blue-600 dark:text-blue-400" :
+          "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400"
+        )}>
           {role.toLowerCase()}
-        </Badge>
+        </span>
       </div>
 
       {/* Nav */}
@@ -111,21 +121,22 @@ export default function DashboardSidebar({ role, userName, userEmail, userImage 
       </nav>
 
       {/* User info at bottom */}
-      <div className="p-3 border-t border-border/50">
+      <div className="p-3 border-t border-border/50 space-y-1">
         <div className="flex items-center gap-3 p-2 rounded-lg hover:bg-muted transition-colors">
           <Avatar className="h-8 w-8 flex-shrink-0">
             <AvatarImage src={userImage || undefined} />
-            <AvatarFallback className="bg-primary text-primary-foreground text-xs">{initials}</AvatarFallback>
+            <AvatarFallback className="bg-gradient-to-br from-blue-500 to-indigo-600 text-white text-xs font-semibold">{initials}</AvatarFallback>
           </Avatar>
           <div className="flex-1 min-w-0">
-            <p className="text-sm font-medium truncate">{userName}</p>
+            <p className="text-sm font-semibold truncate">{userName}</p>
             <p className="text-xs text-muted-foreground truncate">{userEmail}</p>
           </div>
+          <ThemeToggle />
         </div>
         <Button
           variant="ghost"
           size="sm"
-          className="w-full mt-1 text-muted-foreground hover:text-destructive justify-start gap-2"
+          className="w-full text-muted-foreground hover:text-destructive hover:bg-destructive/10 justify-start gap-2"
           onClick={() => signOut({ callbackUrl: "/" })}
         >
           <LogOut className="h-4 w-4" />

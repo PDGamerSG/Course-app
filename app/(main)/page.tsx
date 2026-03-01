@@ -286,7 +286,6 @@ export default async function HomePage() {
                     lessonCount={lessonCount}
                     enrollmentCount={course._count.enrollments}
                     subject={course.subject ?? undefined}
-                    level="FOUNDATION"
                   />
                 )
               })}
@@ -332,7 +331,6 @@ export default async function HomePage() {
                     lessonCount={lessonCount}
                     enrollmentCount={course._count.enrollments}
                     subject={course.subject ?? undefined}
-                    level="DIPLOMA"
                   />
                 )
               })}

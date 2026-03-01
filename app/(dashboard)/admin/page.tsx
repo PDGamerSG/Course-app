@@ -45,13 +45,13 @@ export default async function AdminDashboard() {
   const foundationCourses = allCourses.filter((c) => c.level === "FOUNDATION")
   const diplomaCourses = allCourses.filter((c) => c.level === "DIPLOMA")
 
-  const CourseRow = ({ course }: { course: typeof allCourses[0] }) => {
+  const CourseRow = ({ course, showLevel = false }: { course: typeof allCourses[0]; showLevel?: boolean }) => {
     const lessonCount = course.modules.reduce((sum: number, m: { lessons: { id: string }[] }) => sum + m.lessons.length, 0)
     return (
-      <div className="border border-border/50 rounded-lg p-4 flex gap-4">
+      <div className="border border-border/50 rounded-xl p-4 flex gap-4 hover:border-primary/30 transition-colors bg-card">
         <div className="relative w-20 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
           {course.thumbnail ? (
-            <Image src={course.thumbnail} alt={course.title} fill className="object-cover" />
+            <Image src={course.thumbnail} alt={course.title} fill sizes="80px" className="object-cover" />
           ) : (
             <div className="absolute inset-0 flex items-center justify-center">
               <BookOpen className="h-5 w-5 text-muted-foreground/30" />
@@ -59,24 +59,26 @@ export default async function AdminDashboard() {
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex items-center gap-2 flex-wrap mb-1">
             <h3 className="font-semibold text-sm">{course.title}</h3>
             {course.subject && <span className="text-xs text-primary font-medium">{course.subject}</span>}
             <Badge variant={course.isPublished ? "default" : "outline"} className="text-[10px] h-4 px-1.5">
               {course.isPublished ? "Published" : "Draft"}
             </Badge>
-            <Badge variant="secondary" className={`text-[10px] h-4 px-1.5 ${course.level === "DIPLOMA" ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}>
-              {course.level === "DIPLOMA" ? "Diploma" : "Foundation"}
-            </Badge>
+            {showLevel && (
+              <Badge variant="secondary" className={`text-[10px] h-4 px-1.5 ${course.level === "DIPLOMA" ? "bg-indigo-100 text-indigo-700 dark:bg-indigo-900/30 dark:text-indigo-300" : "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300"}`}>
+                {course.level === "DIPLOMA" ? "Diploma" : "Foundation"}
+              </Badge>
+            )}
           </div>
-          <div className="flex items-center gap-3 mt-1 text-xs text-muted-foreground">
+          <div className="flex items-center gap-3 text-xs text-muted-foreground">
             <span>{lessonCount} lessons</span>
             <span>{course._count.enrollments} students</span>
-            <span className="font-medium text-foreground">{course.price === 0 ? "Free" : `₹${course.price}`}</span>
+            <span className="font-semibold text-foreground">{course.price === 0 ? "Free" : `₹${course.price.toLocaleString("en-IN")}`}</span>
           </div>
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
-          <Button size="sm" variant="outline" asChild>
+          <Button size="sm" variant="outline" asChild className="h-8 text-xs">
             <Link href={`/teacher/courses/${course.id}/edit`}>
               <Pencil className="h-3 w-3 mr-1" />
               Edit
@@ -178,7 +180,7 @@ export default async function AdminDashboard() {
             <EmptyState label="No courses yet" href="/teacher/courses/new" />
           ) : (
             <div className="space-y-3">
-              {allCourses.map((course) => <CourseRow key={course.id} course={course} />)}
+              {allCourses.map((course) => <CourseRow key={course.id} course={course} showLevel />)}
             </div>
           )}
         </TabsContent>
