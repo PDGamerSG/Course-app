@@ -1,5 +1,13 @@
 export type Role = "STUDENT" | "TEACHER" | "ADMIN"
 
+// Razorpay global window type (shared across payment components)
+declare global {
+  interface Window {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Razorpay: any
+  }
+}
+
 export interface CourseWithTeacher {
   id: string
   title: string

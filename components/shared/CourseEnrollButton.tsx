@@ -9,12 +9,6 @@ import { Button } from "@/components/ui/button"
 import { useToast } from "@/hooks/use-toast"
 import PaymentModal from "@/components/shared/PaymentModal"
 
-declare global {
-  interface Window {
-    Razorpay: new (options: RazorpayOptions) => RazorpayInstance
-  }
-}
-
 interface RazorpayOptions {
   key: string
   amount: number
@@ -26,10 +20,6 @@ interface RazorpayOptions {
   prefill?: { name?: string; email?: string }
   theme?: { color?: string }
   modal?: { ondismiss?: () => void }
-}
-
-interface RazorpayInstance {
-  open(): void
 }
 
 interface RazorpayResponse {
@@ -116,7 +106,16 @@ export default function CourseEnrollButton({
         return
       }
 
-      // ── REAL RAZORPAY ──
+      // ── REAL RAZORPAY — load script first ──
+      await new Promise<void>((resolve, reject) => {
+        if (window.Razorpay) { resolve(); return }
+        const s = document.createElement("script")
+        s.src = "https://checkout.razorpay.com/v1/checkout.js"
+        s.onload = () => resolve()
+        s.onerror = () => reject(new Error("Failed to load Razorpay script"))
+        document.body.appendChild(s)
+      })
+
       const options: RazorpayOptions = {
         key: data.keyId,
         amount: data.amount,
