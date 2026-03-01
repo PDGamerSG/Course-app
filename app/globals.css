@@ -8,6 +8,28 @@
   }
 }
 
+/* Page entry animation — every route change fades in smoothly */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+main,
+[data-page] {
+  animation: page-enter 0.25s ease forwards;
+}
+
+/* Smooth link hover transitions */
+a {
+  transition: color 0.15s ease, opacity 0.15s ease;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
