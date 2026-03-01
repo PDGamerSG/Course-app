@@ -1,7 +1,6 @@
 import Link from "next/link"
 import Image from "next/image"
-import { Users, BookOpen, PlayCircle } from "lucide-react"
-import { Badge } from "@/components/ui/badge"
+import { Users, BookOpen, PlayCircle, Star } from "lucide-react"
 
 interface CourseCardProps {
   id: string
@@ -34,9 +33,15 @@ export default function CourseCard({
   level,
 }: CourseCardProps) {
   const displayName = instructorName || teacher.name || "Anonymous"
+  const levelColor = level === "FOUNDATION"
+    ? "from-blue-600 to-blue-500"
+    : level === "DIPLOMA"
+    ? "from-indigo-600 to-violet-500"
+    : "from-primary to-primary"
+
   return (
-    <Link href={`/courses/${id}`} className="group block">
-      <div className="rounded-xl overflow-hidden border border-border/60 bg-card hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 h-full flex flex-col">
+    <Link href={`/courses/${id}`} className="group block h-full">
+      <div className="rounded-2xl overflow-hidden border border-border/50 bg-card hover:border-primary/30 hover:shadow-2xl hover:shadow-primary/8 transition-all duration-300 h-full flex flex-col">
 
         {/* Thumbnail */}
         <div className="relative aspect-video bg-muted overflow-hidden">
@@ -45,81 +50,88 @@ export default function CourseCard({
               src={thumbnail}
               alt={title}
               fill
-              className="object-cover group-hover:scale-[1.04] transition-transform duration-500"
+              className="object-cover group-hover:scale-105 transition-transform duration-500"
             />
           ) : (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br from-primary/20 via-primary/10 to-muted gap-2">
-              <BookOpen className="h-10 w-10 text-primary/50" />
-              <span className="text-xs text-muted-foreground font-medium">LearnHub</span>
+            <div className={`absolute inset-0 flex flex-col items-center justify-center bg-gradient-to-br ${levelColor} opacity-80 gap-2`}>
+              <BookOpen className="h-10 w-10 text-white/80" />
+              <span className="text-xs text-white/70 font-medium">LearnHub</span>
             </div>
           )}
 
-          {/* Play overlay on hover */}
-          <div className="absolute inset-0 bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
-            <div className="bg-white/90 rounded-full p-3 shadow-lg">
-              <PlayCircle className="h-6 w-6 text-primary fill-primary" />
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center">
+            <div className="bg-white rounded-full p-3.5 shadow-xl scale-90 group-hover:scale-100 transition-transform duration-300">
+              <PlayCircle className="h-6 w-6 text-blue-600 fill-blue-600" />
             </div>
           </div>
 
-          {/* Badges */}
-          <div className="absolute top-2.5 left-2.5 flex gap-1.5">
+          {/* Price badge */}
+          <div className="absolute top-3 left-3">
             {price === 0 ? (
-              <Badge className="bg-green-500 hover:bg-green-500 text-white text-[11px] font-semibold shadow">
-                Free
-              </Badge>
+              <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-emerald-500 text-white text-xs font-bold shadow-lg">
+                FREE
+              </span>
             ) : (
-              <Badge className="bg-black/70 hover:bg-black/70 text-white text-[11px] font-semibold backdrop-blur-sm shadow">
-                &#8377;{price.toLocaleString("en-IN")}
-              </Badge>
+              <span className="inline-flex items-center px-2.5 py-1 rounded-lg bg-black/65 backdrop-blur-sm text-white text-xs font-bold shadow-lg">
+                ₹{price.toLocaleString("en-IN")}
+              </span>
             )}
           </div>
 
-          {/* Level badge top-right */}
+          {/* Level badge */}
           {level && (
-            <div className="absolute top-2.5 right-2.5">
-              <Badge className={`text-[10px] font-semibold shadow ${
-                level === "FOUNDATION"
-                  ? "bg-blue-600/80 hover:bg-blue-600/80 text-white"
-                  : "bg-indigo-600/80 hover:bg-indigo-600/80 text-white"
-              }`}>
+            <div className="absolute top-3 right-3">
+              <span className={`inline-flex items-center px-2.5 py-1 rounded-lg bg-gradient-to-r ${levelColor} text-white text-[10px] font-bold shadow-lg uppercase tracking-wide`}>
                 {level === "FOUNDATION" ? "Foundation" : "Diploma"}
-              </Badge>
+              </span>
             </div>
           )}
         </div>
 
         {/* Body */}
-        <div className="p-4 flex flex-col flex-1 gap-3">
-          <div className="flex-1">
-            {subject && (
-              <p className="text-[11px] font-semibold text-primary uppercase tracking-wider mb-1">{subject}</p>
-            )}
-            <h3 className="font-bold text-sm leading-snug line-clamp-2 group-hover:text-primary transition-colors mb-1.5">
-              {title}
-            </h3>
-            {description && (
-              <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed">{description}</p>
-            )}
+        <div className="p-4 flex flex-col flex-1 gap-2.5">
+          {subject && (
+            <span className="text-[10px] font-bold text-primary/80 uppercase tracking-widest">{subject}</span>
+          )}
+
+          <h3 className="font-bold text-sm leading-snug line-clamp-2 group-hover:text-primary transition-colors">
+            {title}
+          </h3>
+
+          {description && (
+            <p className="text-xs text-muted-foreground line-clamp-2 leading-relaxed flex-1">{description}</p>
+          )}
+
+          {/* Rating row (static placeholder) */}
+          <div className="flex items-center gap-1.5">
+            <div className="flex">
+              {[1,2,3,4,5].map((s) => (
+                <Star key={s} className={`h-3 w-3 ${s <= 4 ? "text-amber-400 fill-amber-400" : "text-muted-foreground/30"}`} />
+              ))}
+            </div>
+            <span className="text-[11px] font-semibold text-amber-600">4.0</span>
+            <span className="text-[11px] text-muted-foreground">({enrollmentCount.toLocaleString()})</span>
           </div>
 
-          {/* Teacher */}
-          <div className="flex items-center gap-2">
-            <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary">
+          {/* Instructor */}
+          <div className="flex items-center gap-2 pt-1">
+            <div className="w-6 h-6 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
               {displayName[0].toUpperCase()}
             </div>
-            <span className="text-xs text-muted-foreground">
-              <span className="text-foreground font-medium">{displayName}</span>
+            <span className="text-xs text-muted-foreground truncate">
+              <span className="text-foreground font-semibold">{displayName}</span>
             </span>
           </div>
 
-          {/* Footer stats */}
-          <div className="flex items-center gap-3 text-[11px] text-muted-foreground pt-2 border-t border-border/50">
-            <span className="flex items-center gap-1">
-              <PlayCircle className="h-3 w-3" />
+          {/* Footer */}
+          <div className="flex items-center justify-between pt-2.5 mt-auto border-t border-border/40">
+            <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <PlayCircle className="h-3.5 w-3.5" />
               {lessonCount} lessons
             </span>
-            <span className="flex items-center gap-1">
-              <Users className="h-3 w-3" />
+            <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
+              <Users className="h-3.5 w-3.5" />
               {enrollmentCount.toLocaleString()} students
             </span>
           </div>
