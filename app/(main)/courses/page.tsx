@@ -1,3 +1,4 @@
+import { Suspense } from "react"
 import { Sparkles } from "lucide-react"
 import type { CourseListing } from "@/types"
 import CoursesFilter from "@/components/shared/CoursesFilter"
@@ -66,8 +67,10 @@ export default async function CoursesPage() {
       </div>
 
       <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
-        {/* Client-side filter — instant, no page reload */}
-        <CoursesFilter courses={courses} />
+        {/* Client-side filter — reads URL params, instant filtering */}
+        <Suspense fallback={<div className="h-40 flex items-center justify-center text-muted-foreground text-sm">Loading courses…</div>}>
+          <CoursesFilter courses={courses} />
+        </Suspense>
       </div>
     </div>
   )

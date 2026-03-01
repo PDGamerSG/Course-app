@@ -1,6 +1,7 @@
 "use client"
 
-import { useState, useMemo } from "react"
+import { useState, useMemo, useEffect } from "react"
+import { useRouter, useSearchParams } from "next/navigation"
 import { BookOpen, GraduationCap, SlidersHorizontal, Search } from "lucide-react"
 import { cn } from "@/lib/utils"
 import CourseCard from "@/components/shared/CourseCard"
@@ -25,18 +26,44 @@ const LEVELS = [
   { label: "Diploma", value: "DIPLOMA" },
 ]
 
-export default function CoursesFilter({
-  courses,
-  initialLevel,
-  initialSearch,
-}: {
-  courses: CourseListing[]
-  initialLevel?: string
-  initialSearch?: string
-}) {
-  const [activeLevel, setActiveLevel] = useState(initialLevel ?? "")
-  const [search, setSearch] = useState(initialSearch ?? "")
-  const [inputValue, setInputValue] = useState(initialSearch ?? "")
+export default function CoursesFilter({ courses }: { courses: CourseListing[] }) {
+  const router = useRouter()
+  const searchParams = useSearchParams()
+
+  const [activeLevel, setActiveLevel] = useState(searchParams.get("level") ?? "")
+  const [search, setSearch] = useState(searchParams.get("search") ?? "")
+  const [inputValue, setInputValue] = useState(searchParams.get("search") ?? "")
+
+  // Sync state when URL changes (e.g. navbar links)
+  useEffect(() => {
+    setActiveLevel(searchParams.get("level") ?? "")
+    const s = searchParams.get("search") ?? ""
+    setSearch(s)
+    setInputValue(s)
+  }, [searchParams])
+
+  const setLevel = (level: string) => {
+    setActiveLevel(level)
+    const params = new URLSearchParams()
+    if (level) params.set("level", level)
+    if (search) params.set("search", search)
+    router.replace(`/courses${params.toString() ? `?${params}` : ""}`, { scroll: false })
+  }
+
+  const applySearch = (value: string) => {
+    setSearch(value)
+    const params = new URLSearchParams()
+    if (activeLevel) params.set("level", activeLevel)
+    if (value) params.set("search", value)
+    router.replace(`/courses${params.toString() ? `?${params}` : ""}`, { scroll: false })
+  }
+
+  const clearAll = () => {
+    setActiveLevel("")
+    setSearch("")
+    setInputValue("")
+    router.replace("/courses", { scroll: false })
+  }
 
   const filtered = useMemo(() => {
     return courses.filter((c) => {
@@ -54,20 +81,20 @@ export default function CoursesFilter({
 
   return (
     <>
-      {/* Search + Filter bar */}
+      {/* Search bar */}
       <div className="flex flex-col sm:flex-row gap-4 mb-8">
         <div className="relative flex-1 max-w-xl">
           <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
           <input
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && setSearch(inputValue)}
+            onKeyDown={(e) => e.key === "Enter" && applySearch(inputValue)}
             placeholder="Search courses..."
             className="w-full pl-11 pr-4 h-10 rounded-xl border border-border bg-background text-sm outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary/40 transition-all"
           />
         </div>
         <button
-          onClick={() => setSearch(inputValue)}
+          onClick={() => applySearch(inputValue)}
           className="h-10 px-5 rounded-xl bg-primary text-primary-foreground text-sm font-semibold hover:bg-primary/90 transition-colors"
         >
           Search
@@ -81,7 +108,7 @@ export default function CoursesFilter({
         {LEVELS.map((f) => (
           <button
             key={f.value}
-            onClick={() => setActiveLevel(f.value)}
+            onClick={() => setLevel(f.value)}
             className={cn(
               "px-4 py-1.5 rounded-xl text-sm font-semibold border transition-all",
               activeLevel === f.value
@@ -93,10 +120,7 @@ export default function CoursesFilter({
           </button>
         ))}
         {(search || activeLevel) && (
-          <button
-            onClick={() => { setActiveLevel(""); setSearch(""); setInputValue("") }}
-            className="ml-1 text-xs text-muted-foreground hover:text-destructive underline underline-offset-2"
-          >
+          <button onClick={clearAll} className="ml-1 text-xs text-muted-foreground hover:text-destructive underline underline-offset-2">
             Clear filters
           </button>
         )}
@@ -114,14 +138,9 @@ export default function CoursesFilter({
           </div>
           <h3 className="text-xl font-bold">No courses found</h3>
           <p className="text-muted-foreground text-sm max-w-xs leading-relaxed">
-            {search
-              ? `No results for "${search}". Try a different keyword.`
-              : "No courses match this filter yet. Check back soon!"}
+            {search ? `No results for "${search}". Try a different keyword.` : "No courses match this filter yet."}
           </p>
-          <button
-            onClick={() => { setActiveLevel(""); setSearch(""); setInputValue("") }}
-            className="text-sm text-primary underline underline-offset-2 font-medium"
-          >
+          <button onClick={clearAll} className="text-sm text-primary underline underline-offset-2 font-medium">
             Browse all courses
           </button>
         </div>
@@ -143,19 +162,10 @@ export default function CoursesFilter({
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {foundationCourses.map((course) => (
-                  <CourseCard
-                    key={course.id}
-                    id={course.id}
-                    title={course.title}
-                    description={course.description}
-                    thumbnail={course.thumbnail}
-                    price={course.price}
-                    teacher={course.teacher}
-                    instructorName={course.instructorName}
-                    lessonCount={course.lessonCount}
-                    enrollmentCount={course.enrollmentCount}
-                    subject={course.subject ?? undefined}
-                  />
+                  <CourseCard key={course.id} id={course.id} title={course.title} description={course.description}
+                    thumbnail={course.thumbnail} price={course.price} teacher={course.teacher}
+                    instructorName={course.instructorName} lessonCount={course.lessonCount}
+                    enrollmentCount={course.enrollmentCount} subject={course.subject ?? undefined} />
                 ))}
               </div>
             </section>
@@ -177,19 +187,10 @@ export default function CoursesFilter({
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                 {diplomaCourses.map((course) => (
-                  <CourseCard
-                    key={course.id}
-                    id={course.id}
-                    title={course.title}
-                    description={course.description}
-                    thumbnail={course.thumbnail}
-                    price={course.price}
-                    teacher={course.teacher}
-                    instructorName={course.instructorName}
-                    lessonCount={course.lessonCount}
-                    enrollmentCount={course.enrollmentCount}
-                    subject={course.subject ?? undefined}
-                  />
+                  <CourseCard key={course.id} id={course.id} title={course.title} description={course.description}
+                    thumbnail={course.thumbnail} price={course.price} teacher={course.teacher}
+                    instructorName={course.instructorName} lessonCount={course.lessonCount}
+                    enrollmentCount={course.enrollmentCount} subject={course.subject ?? undefined} />
                 ))}
               </div>
             </section>
