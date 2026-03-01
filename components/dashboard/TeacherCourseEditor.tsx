@@ -151,7 +151,7 @@ export default function TeacherCourseEditor({ course }: Props) {
     try {
       await axios.delete(`/api/courses/${course.id}`)
       toast({ title: "Course deleted" })
-      router.push("/teacher")
+      router.push("/admin")
       router.refresh()
     } catch {
       toast({ title: "Error", description: "Failed to delete course.", variant: "destructive" })

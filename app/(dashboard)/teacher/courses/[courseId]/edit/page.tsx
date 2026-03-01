@@ -48,14 +48,14 @@ export default async function EditCoursePage({
 
   // Only the teacher who owns it or an admin can edit
   if (course.teacherId !== session.user.id && session.user.role !== "ADMIN") {
-    redirect("/teacher")
+    redirect("/admin")
   }
 
   return (
     <div className="h-full flex flex-col">
       <div className="border-b border-border/50 px-6 py-3 flex items-center gap-3 flex-shrink-0">
         <Button variant="ghost" size="sm" asChild>
-          <Link href="/teacher">
+          <Link href="/admin">
             <ArrowLeft className="h-4 w-4 mr-1" />
             Back
           </Link>

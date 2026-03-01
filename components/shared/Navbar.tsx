@@ -36,8 +36,7 @@ export default function Navbar() {
     : "U"
 
   const dashboardHref =
-    session?.user?.role === "ADMIN" ? "/admin" :
-    session?.user?.role === "TEACHER" ? "/teacher" : "/student"
+    session?.user?.role === "ADMIN" || session?.user?.role === "TEACHER" ? "/admin" : "/student"
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()

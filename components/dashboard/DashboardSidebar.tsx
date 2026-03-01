@@ -24,12 +24,13 @@ function getNavItems(role: Role): NavItem[] {
   if (role === "ADMIN") {
     return [
       { href: "/admin", label: "Admin Dashboard", icon: Shield },
+      { href: "/teacher/courses/new", label: "Create Course", icon: Plus },
       { href: "/student", label: "My Courses", icon: GraduationCap },
     ]
   }
   if (role === "TEACHER") {
     return [
-      { href: "/teacher", label: "My Courses", icon: BookOpen },
+      { href: "/admin", label: "Admin Dashboard", icon: Shield },
       { href: "/teacher/courses/new", label: "Create Course", icon: Plus },
     ]
   }

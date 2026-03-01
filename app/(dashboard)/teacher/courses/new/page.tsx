@@ -95,9 +95,9 @@ export default function NewCoursePage() {
     <div className="p-6 max-w-2xl mx-auto">
       <div className="mb-6">
         <Button variant="ghost" size="sm" asChild className="mb-4">
-          <Link href="/teacher">
+          <Link href="/admin">
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to courses
+            Back to dashboard
           </Link>
         </Button>
         <h1 className="text-3xl font-bold">Create New Course</h1>

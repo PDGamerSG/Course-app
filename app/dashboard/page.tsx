@@ -7,7 +7,7 @@ export default async function DashboardPage() {
   if (!session?.user) redirect("/login")
 
   const role = session.user.role
-  if (role === "TEACHER") redirect("/teacher")
+  if (role === "TEACHER") redirect("/admin")
   if (role === "ADMIN") redirect("/admin")
   redirect("/student")
 }

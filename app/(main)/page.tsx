@@ -53,8 +53,7 @@ export default async function HomePage() {
   const diplomaCourses = allCourses.filter((c) => c.level === "DIPLOMA").slice(0, 4)
 
   const dashboardHref =
-    session?.user?.role === "ADMIN" ? "/admin" :
-    session?.user?.role === "TEACHER" ? "/teacher" : "/student"
+    session?.user?.role === "ADMIN" || session?.user?.role === "TEACHER" ? "/admin" : "/student"
 
   return (
     <div className="flex flex-col">
