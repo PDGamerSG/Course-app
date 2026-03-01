@@ -11,6 +11,9 @@ import {
   AccordionTrigger,
 } from "@/components/ui/accordion"
 
+type CourseLesson = { id: string; title: string; duration: string | null; isFree: boolean; order: number }
+type CourseModule = { id: string; title: string; lessons: CourseLesson[] }
+
 export default async function CourseDetailPage({
   params,
 }: {
@@ -42,10 +45,10 @@ export default async function CourseDetailPage({
 
   if (!course) return notFound()
 
-  const totalLessons = course.modules.reduce((sum: number, m: { lessons: unknown[] }) => sum + m.lessons.length, 0)
+  const totalLessons = course.modules.reduce((sum: number, m: CourseModule) => sum + m.lessons.length, 0)
   const totalDuration = course.modules
-    .flatMap((m: { lessons: { duration: string | null }[] }) => m.lessons)
-    .reduce((sum: number, l: { duration: string | null }) => {
+    .flatMap((m: CourseModule) => m.lessons)
+    .reduce((sum: number, l: CourseLesson) => {
       if (!l.duration) return sum
       const parts = l.duration.split(":").map(Number)
       return sum + (parts[0] * 60 + (parts[1] || 0))
@@ -174,7 +177,7 @@ export default async function CourseDetailPage({
                 {course.modules.length} sections • {totalLessons} lessons
               </p>
               <Accordion type="multiple" defaultValue={[course.modules[0]?.id]} className="space-y-2">
-                {course.modules.map((module, idx) => (
+                {course.modules.map((module: CourseModule, idx) => (
                   <AccordionItem
                     key={module.id}
                     value={module.id}
