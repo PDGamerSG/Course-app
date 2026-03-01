@@ -18,7 +18,18 @@ export default async function EditCoursePage({
   try {
     course = await db.course.findUnique({
       where: { id: params.courseId },
-      include: {
+      select: {
+        id: true,
+        title: true,
+        description: true,
+        thumbnail: true,
+        price: true,
+        level: true,
+        subject: true,
+        instructorName: true,
+        isPublished: true,
+        isApproved: true,
+        teacherId: true,
         modules: {
           orderBy: { order: "asc" },
           include: {

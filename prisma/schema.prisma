@@ -42,6 +42,7 @@ model Course {
   price       Float
   level       CourseLevel  @default(FOUNDATION)
   subject     String?
+  instructorName String?
   isPublished Boolean      @default(false)
   isApproved  Boolean      @default(false)
   teacherId   String

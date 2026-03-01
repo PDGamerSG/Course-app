@@ -43,6 +43,7 @@ const schema = z.object({
   description: z.string().min(1, "Description is required"),
   level: z.enum(["FOUNDATION", "DIPLOMA"]),
   subject: z.string().min(1, "Subject is required"),
+  instructorName: z.string().optional(),
   price: z.number().min(0, "Price cannot be negative"),
   thumbnail: z.string().url("Must be a valid URL").optional().or(z.literal("")),
 })
@@ -77,6 +78,7 @@ export default function NewCoursePage() {
         price: data.price,
         level: data.level,
         subject: data.subject,
+        instructorName: data.instructorName || undefined,
         ...(data.thumbnail ? { thumbnail: data.thumbnail } : {}),
       }
       const res = await axios.post("/api/courses", payload)
@@ -200,6 +202,17 @@ export default function NewCoursePage() {
                 disabled={loading}
               />
               {errors.description && <p className="text-xs text-destructive">{errors.description.message}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="instructorName">Instructor Name (optional)</Label>
+              <Input
+                id="instructorName"
+                placeholder="e.g. Prof. Andrew Ng, Dr. Anand Rajaraman"
+                {...register("instructorName")}
+                disabled={loading}
+              />
+              <p className="text-xs text-muted-foreground">The professor&apos;s name shown on the course card</p>
             </div>
 
             <div className="grid grid-cols-2 gap-4">

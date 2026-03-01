@@ -154,6 +154,7 @@ export default async function CoursesPage({
                         thumbnail={course.thumbnail}
                         price={course.price}
                         teacher={course.teacher}
+                        instructorName={course.instructorName}
                         lessonCount={lessonCount}
                         enrollmentCount={course._count.enrollments}
                         subject={course.subject ?? undefined}
@@ -190,6 +191,7 @@ export default async function CoursesPage({
                         thumbnail={course.thumbnail}
                         price={course.price}
                         teacher={course.teacher}
+                        instructorName={course.instructorName}
                         lessonCount={lessonCount}
                         enrollmentCount={course._count.enrollments}
                         subject={course.subject ?? undefined}

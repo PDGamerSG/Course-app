@@ -72,6 +72,7 @@ interface Course {
   price: number
   level: "FOUNDATION" | "DIPLOMA"
   subject: string | null
+  instructorName: string | null
   isPublished: boolean
   isApproved: boolean
   modules: Module[]
@@ -92,6 +93,7 @@ export default function TeacherCourseEditor({ course }: Props) {
   const [thumbnail, setThumbnail] = useState(course.thumbnail || "")
   const [level, setLevel] = useState<"FOUNDATION" | "DIPLOMA">(course.level)
   const [subject, setSubject] = useState(course.subject || "")
+  const [instructorName, setInstructorName] = useState(course.instructorName || "")
   const [savingDetails, setSavingDetails] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -118,6 +120,7 @@ export default function TeacherCourseEditor({ course }: Props) {
         thumbnail: normalizedThumbnail || undefined,
         level,
         subject: subject || undefined,
+        instructorName: instructorName || undefined,
       })
       if (normalizedThumbnail !== thumbnail) setThumbnail(normalizedThumbnail)
       toast({ title: "Details saved!" })
@@ -498,6 +501,16 @@ export default function TeacherCourseEditor({ course }: Props) {
                   />
                   <p className="text-xs text-muted-foreground">Shown on the course card</p>
                 </div>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-sm font-medium">Instructor Name</Label>
+                <Input
+                  value={instructorName}
+                  onChange={(e) => setInstructorName(e.target.value)}
+                  placeholder="e.g. Prof. John Smith, Dr. Anand Rajaraman"
+                />
+                <p className="text-xs text-muted-foreground">The professor&apos;s name shown on the course card. Leave blank to hide instructor name.</p>
               </div>
 
               <div className="grid grid-cols-2 gap-4">

@@ -13,6 +13,7 @@ interface CourseCardProps {
     name: string | null
     image: string | null
   }
+  instructorName?: string | null
   lessonCount: number
   enrollmentCount?: number
   subject?: string
@@ -26,11 +27,13 @@ export default function CourseCard({
   thumbnail,
   price,
   teacher,
+  instructorName,
   lessonCount,
   enrollmentCount = 0,
   subject,
   level,
 }: CourseCardProps) {
+  const displayName = instructorName || teacher.name || "Anonymous"
   return (
     <Link href={`/courses/${id}`} className="group block">
       <div className="rounded-xl overflow-hidden border border-border/60 bg-card hover:border-primary/40 hover:shadow-xl hover:shadow-primary/5 transition-all duration-300 h-full flex flex-col">
@@ -101,21 +104,11 @@ export default function CourseCard({
 
           {/* Teacher */}
           <div className="flex items-center gap-2">
-            {teacher.image ? (
-              <Image
-                src={teacher.image}
-                alt={teacher.name ?? "Teacher"}
-                width={20}
-                height={20}
-                className="rounded-full object-cover"
-              />
-            ) : (
-              <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary">
-                {(teacher.name ?? "T")[0].toUpperCase()}
-              </div>
-            )}
+            <div className="w-5 h-5 rounded-full bg-primary/20 flex items-center justify-center text-[9px] font-bold text-primary">
+              {displayName[0].toUpperCase()}
+            </div>
             <span className="text-xs text-muted-foreground">
-              <span className="text-foreground font-medium">{teacher.name || "Anonymous"}</span>
+              <span className="text-foreground font-medium">{displayName}</span>
             </span>
           </div>
 
