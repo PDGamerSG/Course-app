@@ -22,6 +22,7 @@ const NAV_LINKS = [
   { label: "Courses", href: "/courses" },
   { label: "Foundation", href: "/courses?level=FOUNDATION" },
   { label: "Diploma", href: "/courses?level=DIPLOMA" },
+  { label: "About", href: "/about" },
 ]
 
 export default function Navbar() {
