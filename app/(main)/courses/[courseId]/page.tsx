@@ -42,10 +42,10 @@ export default async function CourseDetailPage({
 
   if (!course) return notFound()
 
-  const totalLessons = course.modules.reduce((sum, m) => sum + m.lessons.length, 0)
+  const totalLessons = course.modules.reduce((sum: number, m) => sum + m.lessons.length, 0)
   const totalDuration = course.modules
     .flatMap((m) => m.lessons)
-    .reduce((sum, l) => {
+    .reduce((sum: number, l) => {
       if (!l.duration) return sum
       const parts = l.duration.split(":").map(Number)
       return sum + (parts[0] * 60 + (parts[1] || 0))

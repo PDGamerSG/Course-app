@@ -157,7 +157,7 @@ export default async function CoursesPage({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                   {foundationCourses.map((course) => {
-                    const lessonCount = course.modules.reduce((sum, m) => sum + m.lessons.length, 0)
+                    const lessonCount = course.modules.reduce((sum: number, m) => sum + m.lessons.length, 0)
                     return (
                       <CourseCard
                         key={course.id}
@@ -195,7 +195,7 @@ export default async function CoursesPage({
                 </div>
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
                   {diplomaCourses.map((course) => {
-                    const lessonCount = course.modules.reduce((sum, m) => sum + m.lessons.length, 0)
+                    const lessonCount = course.modules.reduce((sum: number, m) => sum + m.lessons.length, 0)
                     return (
                       <CourseCard
                         key={course.id}

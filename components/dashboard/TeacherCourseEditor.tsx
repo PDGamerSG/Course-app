@@ -212,7 +212,7 @@ export default function TeacherCourseEditor({ course }: Props) {
     })
   }
 
-  const totalLessons = modules.reduce((sum, m) => sum + m.lessons.length, 0)
+  const totalLessons = modules.reduce((sum: number, m) => sum + m.lessons.length, 0)
 
   return (
     <div className="flex flex-col h-full">
