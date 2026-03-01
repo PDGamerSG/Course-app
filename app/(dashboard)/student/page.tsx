@@ -2,6 +2,7 @@ import { redirect } from "next/navigation"
 import Link from "next/link"
 import Image from "next/image"
 import { BookOpen, PlayCircle } from "lucide-react"
+import type { Prisma } from "@prisma/client"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { Progress } from "@/components/ui/progress"
@@ -9,12 +10,22 @@ import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 
+type EnrollmentWithCourse = Prisma.EnrollmentGetPayload<{
+  include: {
+    course: {
+      include: {
+        teacher: { select: { name: true } }
+        modules: { include: { lessons: { select: { id: true } } } }
+      }
+    }
+  }
+}>
+
 export default async function StudentDashboard() {
   const session = await auth()
   if (!session?.user) redirect("/login")
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let enrollments: any[] = []
+  let enrollments: EnrollmentWithCourse[] = []
   let completedLessonIds = new Set<string>()
   try {
     enrollments = await db.enrollment.findMany({
@@ -60,8 +71,8 @@ export default async function StudentDashboard() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {enrollments.map(({ course }: { course: { id: string; title: string; thumbnail: string | null; teacher: { name: string | null }; modules: { id: string; lessons: { id: string }[] }[] } }) => {
-            const allLessons = course.modules.flatMap((m: { lessons: { id: string }[] }) => m.lessons)
+          {enrollments.map(({ course }) => {
+            const allLessons = course.modules.flatMap((m) => m.lessons)
             const totalLessons = allLessons.length
             const completedCount = allLessons.filter((l) => completedLessonIds.has(l.id)).length
             const progressPct = totalLessons > 0 ? Math.round((completedCount / totalLessons) * 100) : 0

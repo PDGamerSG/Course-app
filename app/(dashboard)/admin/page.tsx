@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation"
 import Link from "next/link"
+import type { Prisma } from "@prisma/client"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
@@ -9,12 +10,19 @@ import AdminCourseActions from "@/components/dashboard/AdminCourseActions"
 import Image from "next/image"
 import { BookOpen, GraduationCap, Plus, Pencil } from "lucide-react"
 
+type AdminCourse = Prisma.CourseGetPayload<{
+  include: {
+    teacher: { select: { id: true; name: true; email: true; image: true } }
+    modules: { include: { lessons: { select: { id: true } } } }
+    _count: { select: { enrollments: true } }
+  }
+}>
+
 export default async function AdminDashboard() {
   const session = await auth()
   if (!session?.user || session.user.role !== "ADMIN") redirect("/student")
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let allCourses: any[] = []
+  let allCourses: AdminCourse[] = []
   try {
     allCourses = await db.course.findMany({
         include: {
@@ -33,8 +41,8 @@ export default async function AdminDashboard() {
   const foundationCourses = allCourses.filter((c) => c.level === "FOUNDATION")
   const diplomaCourses = allCourses.filter((c) => c.level === "DIPLOMA")
 
-  const CourseRow = ({ course, showLevel = false }: { course: typeof allCourses[0]; showLevel?: boolean }) => {
-    const lessonCount = (course.modules as { lessons: { id: string }[] }[]).reduce((sum, m) => sum + m.lessons.length, 0)
+  const CourseRow = ({ course, showLevel = false }: { course: AdminCourse; showLevel?: boolean }) => {
+    const lessonCount = course.modules.reduce((sum, m) => sum + m.lessons.length, 0)
     return (
       <div className="border border-border/50 rounded-xl p-4 flex gap-4 hover:border-primary/30 transition-colors bg-card">
         <div className="relative w-20 h-14 rounded-lg overflow-hidden bg-muted flex-shrink-0">
