@@ -3,6 +3,10 @@ import { z } from "zod"
 import { auth } from "@/lib/auth"
 import { db } from "@/lib/db"
 
+type ApiLesson = { id: string; title: string; youtubeVideoId: string; duration: string | null; notesUrl: string | null; order: number; isFree: boolean; moduleId: string }
+type ApiModule = { id: string; title: string; order: number; courseId: string; lessons: ApiLesson[] }
+type ApiModuleWithLessonIds = { id: string; lessons: { id: string }[] }
+
 const updateCourseSchema = z.object({
   title: z.string().min(1).optional(),
   description: z.string().min(1).optional(),
@@ -58,7 +62,7 @@ export async function GET(
     // Strip youtubeVideoId from lessons for public consumers
     const sanitized = {
       ...course,
-      modules: course.modules.map((mod) => ({
+      modules: (course.modules as ApiModule[]).map((mod) => ({
         ...mod,
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         lessons: mod.lessons.map(({ youtubeVideoId: _vid, ...lesson }) => lesson),
@@ -112,7 +116,7 @@ export async function PUT(
     const data = parsed.data
 
     if (data.isPublished === true) {
-      const hasContent = course.modules.some((m) => m.lessons.length > 0)
+      const hasContent = (course.modules as ApiModuleWithLessonIds[]).some((m) => m.lessons.length > 0)
       if (!hasContent) {
         return NextResponse.json(
           { error: "Course must have at least 1 module with 1 lesson before publishing" },
