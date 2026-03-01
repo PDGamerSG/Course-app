@@ -47,12 +47,8 @@ export default function Navbar() {
   }
 
   return (
-    <header className="sticky top-0 z-50 w-full">
-      {/* Top accent line */}
-      <div className="h-[2px] bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600" />
-
-      <div className="border-b border-border/50 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80">
-        <div className="max-w-7xl mx-auto flex h-[62px] items-center gap-5 px-6 lg:px-8">
+    <header className="sticky top-0 z-50 w-full px-4 pt-3 pb-1">
+      <div className="max-w-7xl mx-auto flex h-[60px] items-center gap-5 px-5 lg:px-7 rounded-2xl border border-border/60 bg-background/80 backdrop-blur-xl shadow-lg shadow-black/10 dark:shadow-black/40">
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">
@@ -179,11 +175,11 @@ export default function Navbar() {
             </Button>
           </div>
         </div>
-      </div>
+
 
       {/* Mobile Menu */}
       {mobileOpen && (
-        <div className="md:hidden border-b border-border bg-background/98 backdrop-blur-xl px-4 py-4 space-y-2">
+        <div className="md:hidden mt-1 rounded-2xl border border-border/60 bg-background/95 backdrop-blur-xl px-4 py-4 space-y-2">
           <form onSubmit={handleSearch} className="relative mb-3">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-muted-foreground pointer-events-none" />
             <input
