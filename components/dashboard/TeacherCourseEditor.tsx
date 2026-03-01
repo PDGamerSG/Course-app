@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import axios from "axios"
 import {
   Plus, Trash2, Send, Save, Loader2,
-  BookOpen, Eye, ChevronDown, ChevronRight, Settings, GraduationCap, AlertTriangle
+  BookOpen, Eye, EyeOff, ChevronDown, ChevronRight, Settings, GraduationCap, AlertTriangle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -94,6 +94,7 @@ export default function TeacherCourseEditor({ course }: Props) {
   const [level, setLevel] = useState<"FOUNDATION" | "DIPLOMA">(course.level)
   const [subject, setSubject] = useState(course.subject || "")
   const [instructorName, setInstructorName] = useState(course.instructorName || "")
+  const [isPublished, setIsPublished] = useState(course.isPublished)
   const [savingDetails, setSavingDetails] = useState(false)
   const [publishing, setPublishing] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -136,10 +137,27 @@ export default function TeacherCourseEditor({ course }: Props) {
     setPublishing(true)
     try {
       await axios.put(`/api/courses/${course.id}`, { isPublished: true })
+      setIsPublished(true)
       toast({ title: "Course is now live!", description: "Students can now find and enroll in your course." })
       router.refresh()
     } catch (err) {
       const msg = axios.isAxiosError(err) ? err.response?.data?.error : "Failed to publish"
+      toast({ title: "Error", description: msg, variant: "destructive" })
+    } finally {
+      setPublishing(false)
+    }
+  }
+
+  const unpublishCourse = async () => {
+    if (!confirm("Unpublish this course? It will be hidden from students.")) return
+    setPublishing(true)
+    try {
+      await axios.put(`/api/courses/${course.id}`, { isPublished: false })
+      setIsPublished(false)
+      toast({ title: "Course unpublished", description: "The course is now hidden from students." })
+      router.refresh()
+    } catch (err) {
+      const msg = axios.isAxiosError(err) ? err.response?.data?.error : "Failed to unpublish"
       toast({ title: "Error", description: msg, variant: "destructive" })
     } finally {
       setPublishing(false)
@@ -204,7 +222,7 @@ export default function TeacherCourseEditor({ course }: Props) {
           <div className="min-w-0">
             <h1 className="text-lg font-semibold truncate">{title || "Untitled Course"}</h1>
             <div className="flex items-center gap-2">
-              {course.isPublished ? (
+              {isPublished ? (
                 <Badge className="bg-green-500/10 text-green-500 border-green-500/20 text-xs">Published</Badge>
               ) : (
                 <Badge variant="outline" className="text-xs">Draft</Badge>
@@ -215,7 +233,7 @@ export default function TeacherCourseEditor({ course }: Props) {
         </div>
 
         <div className="flex items-center gap-2 flex-shrink-0">
-          {course.isPublished && (
+          {isPublished && (
             <Button variant="outline" size="sm" asChild>
               <a href={`/courses/${course.id}`} target="_blank">
                 <Eye className="mr-1.5 h-3.5 w-3.5" />
@@ -223,7 +241,13 @@ export default function TeacherCourseEditor({ course }: Props) {
               </a>
             </Button>
           )}
-          {!course.isPublished && (
+          {isPublished ? (
+            <Button variant="outline" size="sm" onClick={unpublishCourse} disabled={publishing}
+              className="text-destructive border-destructive/30 hover:bg-destructive/10 hover:text-destructive">
+              {publishing ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <EyeOff className="mr-1.5 h-3.5 w-3.5" />}
+              Unpublish
+            </Button>
+          ) : (
             <Button size="sm" onClick={publishCourse} disabled={publishing || totalLessons === 0}>
               {publishing ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Send className="mr-1.5 h-3.5 w-3.5" />}
               Publish Course
@@ -433,7 +457,7 @@ export default function TeacherCourseEditor({ course }: Props) {
             )}
 
             {/* Publish nudge when there's content */}
-            {!course.isPublished && totalLessons > 0 && (
+            {!isPublished && totalLessons > 0 && (
               <div className="rounded-xl border border-primary/20 bg-primary/5 p-4 flex items-center justify-between gap-4">
                 <div>
                   <p className="text-sm font-medium">Ready to go live?</p>

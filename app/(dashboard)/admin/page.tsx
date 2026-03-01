@@ -85,6 +85,7 @@ export default async function AdminDashboard() {
           </Button>
           <AdminCourseActions
             courseId={course.id}
+            isPublished={course.isPublished}
             teacherEmail={course.teacher.email}
             teacherName={course.teacher.name || "Teacher"}
             courseTitle={course.title}
