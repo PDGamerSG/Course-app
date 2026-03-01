@@ -58,6 +58,7 @@ export default function ModuleForm({ courseId, onSuccess, onCancel }: Props) {
           {...register("title")}
           disabled={loading}
           className="h-8 text-sm"
+          autoFocus
         />
         {errors.title && <p className="text-xs text-destructive">{errors.title.message}</p>}
       </div>

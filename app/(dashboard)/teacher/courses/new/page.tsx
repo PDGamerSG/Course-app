@@ -40,7 +40,7 @@ const DIPLOMA_SUBJECTS = [
 
 const schema = z.object({
   title: z.string().min(5, "Title must be at least 5 characters"),
-  description: z.string().min(20, "Description must be at least 20 characters"),
+  description: z.string().min(1, "Description is required"),
   level: z.enum(["FOUNDATION", "DIPLOMA"]),
   subject: z.string().min(1, "Subject is required"),
   price: z.number().min(0, "Price cannot be negative"),
@@ -54,12 +54,12 @@ export default function NewCoursePage() {
   const { toast } = useToast()
   const [loading, setLoading] = useState(false)
   const [selectedLevel, setSelectedLevel] = useState<"FOUNDATION" | "DIPLOMA">("FOUNDATION")
+  const [isCustomSubject, setIsCustomSubject] = useState(false)
 
   const {
     register,
     handleSubmit,
     setValue,
-    watch,
     formState: { errors },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
@@ -121,6 +121,7 @@ export default function NewCoursePage() {
                       setSelectedLevel(lvl)
                       setValue("level", lvl)
                       setValue("subject", "")
+                      setIsCustomSubject(false)
                     }}
                     className={`flex items-center gap-3 p-4 rounded-lg border-2 text-left transition-all ${
                       selectedLevel === lvl
@@ -148,20 +149,30 @@ export default function NewCoursePage() {
               <Label htmlFor="subject">Subject *</Label>
               <select
                 id="subject"
-                {...register("subject")}
                 disabled={loading}
                 className="w-full h-9 rounded-md border border-input bg-background px-3 py-1 text-sm shadow-sm focus:outline-none focus:ring-1 focus:ring-ring"
+                onChange={(e) => {
+                  if (e.target.value === "__custom__") {
+                    setIsCustomSubject(true)
+                    setValue("subject", "")
+                  } else {
+                    setIsCustomSubject(false)
+                    setValue("subject", e.target.value)
+                  }
+                }}
+                defaultValue=""
               >
-                <option value="">Select a subject...</option>
+                <option value="" disabled>Select a subject...</option>
                 {subjects.map((s) => (
                   <option key={s} value={s}>{s}</option>
                 ))}
                 <option value="__custom__">Other (type below)</option>
               </select>
-              {watch("subject") === "__custom__" && (
+              {isCustomSubject && (
                 <Input
                   placeholder="Enter subject name..."
-                  onChange={(e) => setValue("subject", e.target.value || "__custom__")}
+                  autoFocus
+                  onChange={(e) => setValue("subject", e.target.value)}
                   disabled={loading}
                 />
               )}

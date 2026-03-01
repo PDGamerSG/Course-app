@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useRef } from "react"
 import { useRouter } from "next/navigation"
 import axios from "axios"
 import {
@@ -105,6 +105,7 @@ export default function TeacherCourseEditor({ course }: Props) {
   const [showAddModule, setShowAddModule] = useState(false)
   const [addingLessonTo, setAddingLessonTo] = useState<string | null>(null)
   const [editingLesson, setEditingLesson] = useState<Lesson | null>(null)
+  const moduleFormRef = useRef<HTMLDivElement>(null)
 
   const saveDetails = async () => {
     setSavingDetails(true)
@@ -289,7 +290,10 @@ export default function TeacherCourseEditor({ course }: Props) {
                 <h2 className="font-semibold text-base">Course Curriculum</h2>
                 <p className="text-xs text-muted-foreground mt-0.5">Add modules and lessons. Drag lessons to reorder.</p>
               </div>
-              <Button size="sm" onClick={() => setShowAddModule(true)}>
+              <Button size="sm" onClick={() => {
+                setShowAddModule(true)
+                setTimeout(() => moduleFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50)
+              }}>
                 <Plus className="h-3.5 w-3.5 mr-1.5" />
                 Add Module
               </Button>
@@ -300,7 +304,10 @@ export default function TeacherCourseEditor({ course }: Props) {
                 <BookOpen className="h-10 w-10 text-muted-foreground/30 mx-auto mb-3" />
                 <p className="font-medium text-sm mb-1">No modules yet</p>
                 <p className="text-xs text-muted-foreground mb-4">Start building your course by adding a module</p>
-                <Button size="sm" onClick={() => setShowAddModule(true)}>
+                <Button size="sm" onClick={() => {
+                  setShowAddModule(true)
+                  setTimeout(() => moduleFormRef.current?.scrollIntoView({ behavior: "smooth", block: "center" }), 50)
+                }}>
                   <Plus className="h-3.5 w-3.5 mr-1.5" />
                   Add First Module
                 </Button>
@@ -409,6 +416,7 @@ export default function TeacherCourseEditor({ course }: Props) {
 
             {/* Add module form */}
             {showAddModule && (
+              <div ref={moduleFormRef}>
               <ModuleForm
                 courseId={course.id}
                 onSuccess={(module) => {
@@ -418,6 +426,7 @@ export default function TeacherCourseEditor({ course }: Props) {
                 }}
                 onCancel={() => setShowAddModule(false)}
               />
+              </div>
             )}
 
             {/* Publish nudge when there's content */}

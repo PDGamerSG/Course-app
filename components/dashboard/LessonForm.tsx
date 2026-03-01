@@ -31,7 +31,6 @@ function extractYouTubeId(input: string): string {
 const schema = z.object({
   title: z.string().min(3, "Title must be at least 3 characters"),
   youtubeInput: z.string().min(5, "Please enter a valid YouTube URL or Video ID"),
-  duration: z.string().optional(),
   notesUrl: z.string().optional(),
   isFree: z.boolean(),
 })
@@ -72,7 +71,6 @@ export default function LessonForm({ courseId, moduleId, onSuccess, onCancel, ex
     defaultValues: {
       title: existingLesson?.title || "",
       youtubeInput: existingLesson?.youtubeVideoId || "",
-      duration: existingLesson?.duration || "",
       notesUrl: existingLesson?.notesUrl || "",
       isFree: existingLesson?.isFree || false,
     },
@@ -87,7 +85,6 @@ export default function LessonForm({ courseId, moduleId, onSuccess, onCancel, ex
       const payload = {
         title: data.title,
         youtubeVideoId,
-        duration: data.duration || undefined,
         notesUrl: data.notesUrl || undefined,
         isFree: data.isFree,
       }
@@ -143,17 +140,7 @@ export default function LessonForm({ courseId, moduleId, onSuccess, onCancel, ex
           <p className="text-xs text-muted-foreground">Paste the full YouTube link or just the video ID</p>
         </div>
 
-        <div className="space-y-1">
-          <Label className="text-xs">Duration (optional)</Label>
-          <Input
-            placeholder="12:34"
-            {...register("duration")}
-            disabled={loading}
-            className="h-8 text-sm"
-          />
-        </div>
-
-        <div className="col-span-2 space-y-1">
+      <div className="col-span-2 space-y-1">
           <Label className="text-xs">Notes / Resources Link (optional)</Label>
           <Input
             placeholder="https://drive.google.com/file/d/..."
