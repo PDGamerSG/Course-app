@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation"
 import axios from "axios"
 import {
   Plus, Trash2, Send, Save, Loader2,
-  BookOpen, Eye, ChevronDown, ChevronRight, Settings, GraduationCap
+  BookOpen, Eye, ChevronDown, ChevronRight, Settings, GraduationCap, AlertTriangle
 } from "lucide-react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -13,10 +13,37 @@ import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Badge } from "@/components/ui/badge"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import {
+  AlertDialog, AlertDialogAction, AlertDialogCancel,
+  AlertDialogContent, AlertDialogDescription, AlertDialogFooter,
+  AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"
 import { useToast } from "@/hooks/use-toast"
 import ModuleForm from "./ModuleForm"
 import LessonForm from "./LessonForm"
 import DraggableLessonList from "./DraggableLessonList"
+
+/** Convert any Google Drive share/view URL to a direct-view image URL.
+ *  Supports:
+ *    https://drive.google.com/file/d/FILE_ID/view
+ *    https://drive.google.com/open?id=FILE_ID
+ *    https://drive.google.com/uc?id=FILE_ID   (already direct)
+ *  Returns original string unchanged for non-Drive URLs.
+ */
+function normalizeThumbnailUrl(url: string): string {
+  const trimmed = url.trim()
+  if (!trimmed) return trimmed
+
+  // Match /file/d/FILE_ID/ pattern
+  const fileMatch = trimmed.match(/\/file\/d\/([a-zA-Z0-9_-]+)/)
+  if (fileMatch) return `https://drive.google.com/uc?export=view&id=${fileMatch[1]}`
+
+  // Match ?id=FILE_ID or &id=FILE_ID
+  const idMatch = trimmed.match(/[?&]id=([a-zA-Z0-9_-]+)/)
+  if (idMatch && trimmed.includes("drive.google.com")) return `https://drive.google.com/uc?export=view&id=${idMatch[1]}`
+
+  return trimmed
+}
 
 interface Lesson {
   id: string
@@ -63,6 +90,7 @@ export default function TeacherCourseEditor({ course }: Props) {
   const [thumbnail, setThumbnail] = useState(course.thumbnail || "")
   const [savingDetails, setSavingDetails] = useState(false)
   const [publishing, setPublishing] = useState(false)
+  const [deleting, setDeleting] = useState(false)
 
   // Curriculum state
   const [modules, setModules] = useState<Module[]>(course.modules)
@@ -77,12 +105,14 @@ export default function TeacherCourseEditor({ course }: Props) {
   const saveDetails = async () => {
     setSavingDetails(true)
     try {
+      const normalizedThumbnail = normalizeThumbnailUrl(thumbnail)
       await axios.put(`/api/courses/${course.id}`, {
         title,
         description,
         price: Number(price),
-        thumbnail: thumbnail || undefined,
+        thumbnail: normalizedThumbnail || undefined,
       })
+      if (normalizedThumbnail !== thumbnail) setThumbnail(normalizedThumbnail)
       toast({ title: "Details saved!" })
       router.refresh()
     } catch {
@@ -103,6 +133,19 @@ export default function TeacherCourseEditor({ course }: Props) {
       toast({ title: "Error", description: msg, variant: "destructive" })
     } finally {
       setPublishing(false)
+    }
+  }
+
+  const deleteCourse = async () => {
+    setDeleting(true)
+    try {
+      await axios.delete(`/api/courses/${course.id}`)
+      toast({ title: "Course deleted" })
+      router.push("/teacher")
+      router.refresh()
+    } catch {
+      toast({ title: "Error", description: "Failed to delete course.", variant: "destructive" })
+      setDeleting(false)
     }
   }
 
@@ -176,6 +219,38 @@ export default function TeacherCourseEditor({ course }: Props) {
               Publish Course
             </Button>
           )}
+
+          {/* Delete course */}
+          <AlertDialog>
+            <AlertDialogTrigger asChild>
+              <Button variant="ghost" size="sm" className="text-destructive hover:text-destructive hover:bg-destructive/10">
+                <Trash2 className="h-3.5 w-3.5" />
+              </Button>
+            </AlertDialogTrigger>
+            <AlertDialogContent>
+              <AlertDialogHeader>
+                <AlertDialogTitle className="flex items-center gap-2">
+                  <AlertTriangle className="h-5 w-5 text-destructive" />
+                  Delete &quot;{title}&quot;?
+                </AlertDialogTitle>
+                <AlertDialogDescription>
+                  This will permanently delete the course, all its modules, lessons, and student enrollments.
+                  This action <strong>cannot be undone</strong>.
+                </AlertDialogDescription>
+              </AlertDialogHeader>
+              <AlertDialogFooter>
+                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                <AlertDialogAction
+                  onClick={deleteCourse}
+                  disabled={deleting}
+                  className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+                >
+                  {deleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
+                  Yes, delete course
+                </AlertDialogAction>
+              </AlertDialogFooter>
+            </AlertDialogContent>
+          </AlertDialog>
         </div>
       </div>
 
@@ -400,22 +475,33 @@ export default function TeacherCourseEditor({ course }: Props) {
                 </div>
 
                 <div className="space-y-1.5">
-                  <Label className="text-sm font-medium">Thumbnail URL</Label>
+                  <Label className="text-sm font-medium">Thumbnail</Label>
                   <Input
                     type="url"
-                    placeholder="https://..."
+                    placeholder="https://drive.google.com/file/d/... or any image URL"
                     value={thumbnail}
                     onChange={(e) => setThumbnail(e.target.value)}
                   />
-                  <p className="text-xs text-muted-foreground">Optional cover image</p>
+                  <p className="text-xs text-muted-foreground">
+                    Paste a Google Drive share link or any direct image URL
+                  </p>
                 </div>
               </div>
 
               {/* Thumbnail preview */}
               {thumbnail && (
-                <div className="rounded-lg overflow-hidden border border-border/50 aspect-video w-full max-w-xs">
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={thumbnail} alt="Thumbnail preview" className="w-full h-full object-cover" />
+                <div className="space-y-1.5">
+                  <Label className="text-xs text-muted-foreground">Preview</Label>
+                  <div className="rounded-lg overflow-hidden border border-border/50 aspect-video w-full max-w-xs bg-muted">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img
+                      src={normalizeThumbnailUrl(thumbnail)}
+                      alt="Thumbnail preview"
+                      className="w-full h-full object-cover"
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none" }}
+                    />
+                  </div>
+                  <p className="text-xs text-muted-foreground">If blank, make sure the file is publicly shared in Drive.</p>
                 </div>
               )}
             </div>
