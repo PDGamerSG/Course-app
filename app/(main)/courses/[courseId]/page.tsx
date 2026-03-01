@@ -70,8 +70,7 @@ export default async function CourseDetailPage({
   const isEnrolled = !!enrollment
   const isOwner = session?.user?.id === course.teacherId || session?.user?.role === "ADMIN"
   const hasAccess = isEnrolled || isOwner
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const displayName = (course as any).instructorName || course.teacher.name || "Anonymous"
+  const displayName = course.instructorName || course.teacher.name || "Anonymous"
 
   const firstLesson = course.modules[0]?.lessons[0]
 

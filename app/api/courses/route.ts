@@ -20,8 +20,11 @@ export async function GET(request: NextRequest) {
     const filter = searchParams.get("filter")
     const search = searchParams.get("search")
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const where: any = {
+    const where: {
+      isPublished: boolean
+      price?: number | { gt: number }
+      title?: { contains: string; mode: "insensitive" }
+    } = {
       isPublished: true,
     }
 
