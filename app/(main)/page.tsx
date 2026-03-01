@@ -7,7 +7,8 @@ import CourseCard from "@/components/shared/CourseCard"
 import { db } from "@/lib/db"
 import { auth } from "@/lib/auth"
 
-export const dynamic = "force-dynamic"
+// Cache homepage for 5 minutes — significant perf boost vs force-dynamic
+export const revalidate = 300
 
 async function getProgramData(): Promise<CourseListing[]> {
   try {
