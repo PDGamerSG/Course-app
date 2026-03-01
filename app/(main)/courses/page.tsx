@@ -62,7 +62,7 @@ export default async function CoursesPage({
         <div className="absolute top-0 left-1/4 w-[400px] h-[300px] bg-blue-700/20 rounded-full blur-[100px] pointer-events-none" />
         <div className="absolute bottom-0 right-1/4 w-[300px] h-[200px] bg-indigo-700/15 rounded-full blur-[80px] pointer-events-none" />
 
-        <div className="relative z-10 container mx-auto px-4 py-14">
+        <div className="relative z-10 max-w-5xl mx-auto px-6 lg:px-8 py-14">
           <div className="max-w-3xl">
             <div className="flex items-center gap-2 mb-3">
               <Sparkles className="h-4 w-4 text-indigo-400" />
@@ -98,7 +98,7 @@ export default async function CoursesPage({
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-10">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 py-10">
         {/* Level filter */}
         <div className="flex items-center gap-2.5 mb-10 flex-wrap">
           <SlidersHorizontal className="h-3.5 w-3.5 text-muted-foreground" />

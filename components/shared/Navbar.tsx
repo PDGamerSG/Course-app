@@ -53,7 +53,7 @@ export default function Navbar() {
       <div className="h-[2px] bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-600" />
 
       <div className="border-b border-border/50 bg-background/95 backdrop-blur-xl supports-[backdrop-filter]:bg-background/80">
-        <div className="container mx-auto flex h-[62px] items-center gap-5 px-4 lg:px-6">
+        <div className="max-w-7xl mx-auto flex h-[62px] items-center gap-5 px-6 lg:px-8">
 
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 shrink-0 group">

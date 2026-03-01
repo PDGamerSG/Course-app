@@ -71,7 +71,7 @@ export default async function HomePage() {
         <div className="absolute bottom-[-50px] right-[10%] w-[500px] h-[400px] bg-indigo-700/20 rounded-full blur-[110px] pointer-events-none" />
         <div className="absolute top-[40%] left-[60%] w-[300px] h-[300px] bg-violet-700/15 rounded-full blur-[100px] pointer-events-none" />
 
-        <div className="relative z-10 container mx-auto px-4 py-28 md:py-40 text-center">
+        <div className="relative z-10 max-w-5xl mx-auto px-6 lg:px-8 py-28 md:py-40 text-center">
           {/* Announcement pill */}
           <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-white/80 text-sm">
             <span className="flex h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
@@ -135,7 +135,7 @@ export default async function HomePage() {
 
       {/* ── STATS STRIP ── */}
       <section className="border-y border-border/30 bg-gradient-to-r from-muted/20 via-muted/40 to-muted/20">
-        <div className="container mx-auto px-4 py-8">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8 py-8">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             {[
               { value: "10,000+", label: "Active Students", icon: Users, color: "text-blue-500" },
@@ -158,7 +158,7 @@ export default async function HomePage() {
       </section>
 
       {/* ── PROGRAM TRACKS ── */}
-      <section className="container mx-auto px-4 py-24">
+      <section className="max-w-7xl mx-auto px-6 lg:px-8 py-24">
         <div className="text-center mb-14">
           <Badge variant="outline" className="mb-3 px-3 py-1 text-xs font-semibold uppercase tracking-widest border-primary/30 text-primary">
             Two Programs
@@ -252,7 +252,7 @@ export default async function HomePage() {
       {/* ── FOUNDATION COURSES ── */}
       {foundationCourses.length > 0 && (
         <section className="bg-muted/20 border-y border-border/30 py-20">
-          <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="flex items-end justify-between mb-10">
               <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -297,7 +297,7 @@ export default async function HomePage() {
       {/* ── DIPLOMA COURSES ── */}
       {diplomaCourses.length > 0 && (
         <section className="py-20">
-          <div className="container mx-auto px-4">
+          <div className="max-w-7xl mx-auto px-6 lg:px-8">
             <div className="flex items-end justify-between mb-10">
               <div>
                 <div className="flex items-center gap-2 mb-2">
@@ -341,7 +341,7 @@ export default async function HomePage() {
 
       {/* ── HOW IT WORKS ── */}
       <section className="border-y border-border/30 bg-muted/20 py-20">
-        <div className="container mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="text-center mb-14">
             <Badge variant="outline" className="mb-3 px-3 py-1 text-xs font-semibold uppercase tracking-widest border-primary/30 text-primary">
               How it works
@@ -375,7 +375,7 @@ export default async function HomePage() {
 
       {/* ── WHY US ── */}
       <section className="py-24">
-        <div className="container mx-auto px-4">
+        <div className="max-w-7xl mx-auto px-6 lg:px-8">
           <div className="grid md:grid-cols-2 gap-16 items-center">
             <div>
               <Badge variant="outline" className="mb-4 px-3 py-1 text-xs font-semibold uppercase tracking-widest border-primary/30 text-primary">
@@ -437,7 +437,7 @@ export default async function HomePage() {
           style={{ backgroundImage: "linear-gradient(#6366f1 1px,transparent 1px),linear-gradient(90deg,#6366f1 1px,transparent 1px)", backgroundSize: "60px 60px" }}
         />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[400px] bg-indigo-600/20 rounded-full blur-[130px] pointer-events-none" />
-        <div className="relative z-10 container mx-auto px-4 text-center">
+        <div className="relative z-10 max-w-5xl mx-auto px-6 lg:px-8 text-center">
           <div className="inline-flex items-center gap-2 mb-6 px-4 py-2 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-white/70 text-sm">
             <GraduationCap className="h-4 w-4 text-indigo-400" />
             Start your IITM degree journey

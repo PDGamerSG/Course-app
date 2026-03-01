@@ -79,7 +79,7 @@ export default async function CourseDetailPage({
       <div className="bg-[#060B1F] text-white relative overflow-hidden">
         <div className="absolute inset-0 opacity-[0.04]" style={{ backgroundImage: "linear-gradient(#6366f1 1px,transparent 1px),linear-gradient(90deg,#6366f1 1px,transparent 1px)", backgroundSize: "60px 60px" }} />
         <div className="absolute top-0 left-1/4 w-[400px] h-[300px] bg-blue-700/15 rounded-full blur-[100px] pointer-events-none" />
-        <div className="relative z-10 container mx-auto px-4 py-12 max-w-6xl">
+        <div className="relative z-10 max-w-6xl mx-auto px-6 lg:px-8 py-12">
           <div className="flex gap-2 mb-4">
             {levelLabel && (
               <span className={`inline-flex items-center px-3 py-1 rounded-lg bg-gradient-to-r ${levelColor} text-white text-xs font-bold`}>
@@ -136,7 +136,7 @@ export default async function CourseDetailPage({
       </div>
 
       {/* ── Content ── */}
-      <div className="container mx-auto px-4 py-10 max-w-6xl">
+      <div className="max-w-6xl mx-auto px-6 lg:px-8 py-10">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
 
           {/* Left: Curriculum */}
